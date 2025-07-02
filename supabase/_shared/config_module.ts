@@ -1,5 +1,5 @@
 
-import { Config } from '../types';
+import { Config } from './types';
 
 export const loadConfig = (): Config => {
   const requiredEnvVars = [
@@ -64,28 +64,5 @@ export const validateConfig = (config: Config): void => {
   }
 };
 
-// Example .env file template
-export const envTemplate = `
-# Kalshi Configuration
-KALSHI_API_KEY=your_kalshi_api_key_here
-KALSHI_ENVIRONMENT=demo  # or 'production'
 
-# OpenAI Configuration (for semantic analysis)
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4
-
-# Strategy Configuration
-MAX_INVESTMENT=1000
-MIN_EXPECTED_RETURN=0.02
-MIN_TIME_THRESHOLD=1
-MAX_TIME_THRESHOLD=365
-TRANSACTION_COST_PCT=0.02
-RISK_TOLERANCE=moderate
-
-# Monitoring Configuration
-CHECK_INTERVAL_MINUTES=15
-ALERT_THRESHOLD=0.05
-LOG_LEVEL=info
-`;
-
-export default { loadConfig, validateConfig, envTemplate };
+export default { loadConfig, validateConfig };

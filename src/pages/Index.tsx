@@ -1,39 +1,49 @@
-
 import { useState, useEffect } from 'react';
 import { LoginForm } from '@/components/LoginForm';
 import { Dashboard } from '@/components/Dashboard';
+import { createClient } from '@supabase/supabase-js';
 
-// Mock user session - in real app this would be managed via backend/auth service
-const ADMIN_USER = {
-  username: 'admin',
-  password: 'arbitrage2024' // In production, this would be properly hashed/secured
-};
+// Supabase client setup
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in (localStorage for demo)
-    const savedAuth = localStorage.getItem('arbitrage_auth');
-    if (savedAuth === 'authenticated') {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
+    // Check Supabase session
+    const session = supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsAuthenticated(true);
+      }
+      setIsLoading(false);
+    });
+    // Listen for auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
   }, []);
 
-  const handleLogin = (username: string, password: string): boolean => {
-    if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
+  const handleLogin = async (username: string, password: string): Promise<boolean> => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: username,
+      password
+    });
+    if (!error) {
       setIsAuthenticated(true);
-      localStorage.setItem('arbitrage_auth', 'authenticated');
       return true;
     }
     return false;
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setIsAuthenticated(false);
-    localStorage.removeItem('arbitrage_auth');
   };
 
   if (isLoading) {

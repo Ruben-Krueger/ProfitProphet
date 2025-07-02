@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp } from 'lucide-react';
 
 interface LoginFormProps {
-  onLogin: (username: string, password: string) => boolean;
+  onLogin: (username: string, password: string) => Promise<boolean>;
 }
 
 export const LoginForm = ({ onLogin }: LoginFormProps) => {
@@ -23,7 +22,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    const success = onLogin(username, password);
+    const success = await onLogin(username, password);
     if (!success) {
       setError('Invalid credentials');
     }
