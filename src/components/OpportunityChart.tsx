@@ -1,5 +1,12 @@
-
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 interface OpportunityChartProps {
   data: any[];
@@ -18,29 +25,22 @@ export const OpportunityChart = ({ data }: OpportunityChartProps) => {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis 
-            dataKey="name" 
-            stroke="#9CA3AF"
-            fontSize={12}
-          />
-          <YAxis 
-            stroke="#9CA3AF"
-            fontSize={12}
-          />
-          <Tooltip 
+          <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
+          <YAxis stroke="#9CA3AF" fontSize={12} />
+          <Tooltip
             contentStyle={{
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
-              borderRadius: '8px',
-              color: '#F9FAFB'
+              backgroundColor: "#1F2937",
+              border: "1px solid #374151",
+              borderRadius: "8px",
+              color: "#F9FAFB",
             }}
           />
-          <Line 
-            type="monotone" 
-            dataKey="expectedPayout" 
-            stroke="#10B981" 
+          <Line
+            type="monotone"
+            dataKey="expectedPayout"
+            stroke="#10B981"
             strokeWidth={2}
-            dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+            dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
           />
         </LineChart>
       </ResponsiveContainer>

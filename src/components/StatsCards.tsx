@@ -1,6 +1,5 @@
-
-import { Card, CardContent } from '@/components/ui/card';
-import { TrendingUp, DollarSign, Target, Activity } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { TrendingUp, DollarSign, Target, Activity } from "lucide-react";
 
 interface StatsCardsProps {
   stats: {
@@ -13,9 +12,9 @@ interface StatsCardsProps {
 
 export const StatsCards = ({ stats }: StatsCardsProps) => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
@@ -25,32 +24,32 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
 
   const cardData = [
     {
-      title: 'Total Profit',
+      title: "Total Profit",
       value: formatCurrency(stats.totalProfit),
       icon: DollarSign,
-      color: 'text-emerald-400',
-      bgColor: 'bg-emerald-500/10',
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-500/10",
     },
     {
-      title: 'Active Opportunities',
+      title: "Active Opportunities",
       value: stats.activeOpportunities.toString(),
       icon: Activity,
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/10',
+      color: "text-blue-400",
+      bgColor: "bg-blue-500/10",
     },
     {
-      title: 'Success Rate',
+      title: "Success Rate",
       value: formatPercentage(stats.successRate),
       icon: Target,
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-500/10',
+      color: "text-purple-400",
+      bgColor: "bg-purple-500/10",
     },
     {
-      title: 'Today\'s Profits',
+      title: "Today's Profits",
       value: formatCurrency(stats.todaysProfits),
       icon: TrendingUp,
-      color: 'text-orange-400',
-      bgColor: 'bg-orange-500/10',
+      color: "text-orange-400",
+      bgColor: "bg-orange-500/10",
     },
   ];
 

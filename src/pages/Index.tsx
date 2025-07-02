@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { LoginForm } from '@/components/LoginForm';
-import { Dashboard } from '@/components/Dashboard';
-import { createClient } from '@supabase/supabase-js';
+import { useState, useEffect } from "react";
+import { LoginForm } from "@/components/LoginForm";
+import { Dashboard } from "@/components/Dashboard";
+import { createClient } from "@supabase/supabase-js";
 
 // Supabase client setup
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
@@ -21,18 +21,23 @@ const Index = () => {
       setIsLoading(false);
     });
     // Listen for auth state changes
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setIsAuthenticated(!!session);
+      }
+    );
     return () => {
       listener?.subscription.unsubscribe();
     };
   }, []);
 
-  const handleLogin = async (username: string, password: string): Promise<boolean> => {
+  const handleLogin = async (
+    username: string,
+    password: string
+  ): Promise<boolean> => {
     const { error } = await supabase.auth.signInWithPassword({
       email: username,
-      password
+      password,
     });
     if (!error) {
       setIsAuthenticated(true);

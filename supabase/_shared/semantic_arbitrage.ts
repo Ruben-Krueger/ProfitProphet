@@ -1,7 +1,12 @@
 // src/calculators/semantic.ts
 
-import { Market, ArbitrageOpportunity, SemanticSimilarity, Config } from '../types';
-import { calculateBasicArbitrage } from './utils';
+import {
+  Market,
+  ArbitrageOpportunity,
+  SemanticSimilarity,
+  Config,
+} from "../types";
+import { calculateBasicArbitrage } from "./utils";
 
 interface OpenAIResponse {
   choices: Array<{
@@ -14,27 +19,37 @@ interface OpenAIResponse {
 export class SemanticArbitrageCalculator {
   private openaiApiKey: string;
   private model: string;
-  private config: Config['strategy'];
+  private config: Config["strategy"];
 
-  constructor(openaiConfig: Config['openai'], strategyConfig: Config['strategy']) {
+  constructor(
+    openaiConfig: Config["openai"],
+    strategyConfig: Config["strategy"]
+  ) {
     this.openaiApiKey = openaiConfig.apiKey;
     this.model = openaiConfig.model;
     this.config = strategyConfig;
   }
 
-  async findSemanticArbitrage(markets: Market[]): Promise<ArbitrageOpportunity[]> {
+  async findSemanticArbitrage(
+    markets: Market[]
+  ): Promise<ArbitrageOpportunity[]> {
     const opportunities: ArbitrageOpportunity[] = [];
     const similarities = await this.findSimilarQuestions(markets);
 
     for (const similarity of similarities) {
-      if (similarity.similarity > 0.85) { // High semantic similarity threshold
+      if (similarity.similarity > 0.85) {
+        // High semantic similarity threshold
         const priceDiscrepancy = Math.abs(
           similarity.market1.yesPrice - similarity.market2.yesPrice
         );
 
-        if (priceDiscrepancy > 0.05) { // 5 cent minimum price difference
+        if (priceDiscrepancy > 0.05) {
+          // 5 cent minimum price difference
           const arbitrage = this.calculateSemanticArbitrage(similarity);
-          if (arbitrage && arbitrage.expectedReturn > this.config.minExpectedReturn) {
+          if (
+            arbitrage &&
+            arbitrage.expectedReturn > this.config.minExpectedReturn
+          ) {
             opportunities.push(arbitrage);
           }
         }
@@ -44,7 +59,9 @@ export class SemanticArbitrageCalculator {
     return opportunities.sort((a, b) => b.expectedReturn - a.expectedReturn);
   }
 
-  private async findSimilarQuestions(markets: Market[]): Promise<SemanticSimilarity[]> {
+  private async findSimilarQuestions(
+    markets: Market[]
+  ): Promise<SemanticSimilarity[]> {
     const similarities: SemanticSimilarity[] = [];
     const batchSize = 10; // Process in batches to avoid rate limits
 
@@ -52,7 +69,7 @@ export class SemanticArbitrageCalculator {
       const batch = markets.slice(i, i + batchSize);
       const batchSimilarities = await this.processBatch(batch, markets);
       similarities.push(...batchSimilarities);
-      
+
       // Rate limiting delay
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
@@ -61,7 +78,7 @@ export class SemanticArbitrageCalculator {
   }
 
   private async processBatch(
-    batch: Market[], 
+    batch: Market[],
     allMarkets: Market[]
   ): Promise<SemanticSimilarity[]> {
     const similarities: SemanticSimilarity[] = [];
@@ -69,9 +86,10 @@ export class SemanticArbitrageCalculator {
     for (const market1 of batch) {
       for (const market2 of allMarkets) {
         if (market1.id >= market2.id) continue; // Avoid duplicates and self-comparison
-        
+
         const similarity = await this.calculateSimilarity(market1, market2);
-        if (similarity.similarity > 0.7) { // Only keep reasonably similar questions
+        if (similarity.similarity > 0.7) {
+          // Only keep reasonably similar questions
           similarities.push(similarity);
         }
       }
@@ -81,7 +99,7 @@ export class SemanticArbitrageCalculator {
   }
 
   private async calculateSimilarity(
-    market1: Market, 
+    market1: Market,
     market2: Market
   ): Promise<SemanticSimilarity> {
     const prompt = `
@@ -115,24 +133,27 @@ export class SemanticArbitrageCalculator {
     `;
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.openaiApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          temperature: 0.1, // Low temperature for consistent analysis
-          max_tokens: 500,
-        }),
-      });
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.openaiApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: this.model,
+            messages: [
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            temperature: 0.1, // Low temperature for consistent analysis
+            max_tokens: 500,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`OpenAI API error: ${response.statusText}`);
@@ -140,7 +161,7 @@ export class SemanticArbitrageCalculator {
 
       const data: OpenAIResponse = await response.json();
       const content = data.choices[0].message.content;
-      
+
       try {
         const parsed = JSON.parse(content);
         return {
@@ -150,32 +171,35 @@ export class SemanticArbitrageCalculator {
           reasoning: parsed.reasoning,
         };
       } catch (parseError) {
-        console.warn('Failed to parse OpenAI response:', content);
+        console.warn("Failed to parse OpenAI response:", content);
         return {
           market1,
           market2,
           similarity: 0,
-          reasoning: 'Failed to analyze similarity',
+          reasoning: "Failed to analyze similarity",
         };
       }
     } catch (error) {
-      console.error('Error calculating similarity:', error);
+      console.error("Error calculating similarity:", error);
       return {
         market1,
         market2,
         similarity: 0,
-        reasoning: 'Error in similarity calculation',
+        reasoning: "Error in similarity calculation",
       };
     }
   }
 
-  private calculateSemanticArbitrage(similarity: SemanticSimilarity): ArbitrageOpportunity | null {
+  private calculateSemanticArbitrage(
+    similarity: SemanticSimilarity
+  ): ArbitrageOpportunity | null {
     const { market1, market2 } = similarity;
-    
+
     // Determine which market is cheaper for YES bets
     const cheaperYes = market1.yesPrice < market2.yesPrice ? market1 : market2;
-    const expensiveYes = market1.yesPrice < market2.yesPrice ? market2 : market1;
-    
+    const expensiveYes =
+      market1.yesPrice < market2.yesPrice ? market2 : market1;
+
     // Calculate arbitrage opportunity
     const arbitrage = calculateBasicArbitrage(
       cheaperYes,
@@ -192,7 +216,7 @@ export class SemanticArbitrageCalculator {
 
     return {
       id: `semantic_${market1.id}_${market2.id}`,
-      type: 'semantic',
+      type: "semantic",
       markets: [market1, market2],
       expectedReturn: arbitrage.expectedReturn,
       netReturn: arbitrage.netReturn,
@@ -201,17 +225,17 @@ export class SemanticArbitrageCalculator {
         actions: [
           {
             marketId: cheaperYes.id,
-            side: 'yes',
+            side: "yes",
             price: cheaperYes.yesPrice,
             quantity: arbitrage.optimalBetSize,
-            orderType: 'limit',
+            orderType: "limit",
           },
           {
             marketId: expensiveYes.id,
-            side: 'no',
+            side: "no",
             price: expensiveYes.noPrice,
             quantity: arbitrage.optimalBetSize,
-            orderType: 'limit',
+            orderType: "limit",
           },
         ],
         totalCost: arbitrage.totalCost,
@@ -221,22 +245,24 @@ export class SemanticArbitrageCalculator {
       reasoning: `Semantic arbitrage: ${similarity.reasoning}. Price difference: ${Math.abs(market1.yesPrice - market2.yesPrice).toFixed(3)}`,
       timeToExpiry,
       requiredInvestment: arbitrage.totalCost,
-      riskLevel: similarity.similarity > 0.9 ? 'low' : 'medium',
+      riskLevel: similarity.similarity > 0.9 ? "low" : "medium",
       detectedAt: new Date(),
     };
   }
 
   // Batch processing for efficiency
   async findSemanticArbitrageBatch(
-    markets: Market[], 
+    markets: Market[],
     batchSize: number = 50
   ): Promise<ArbitrageOpportunity[]> {
     const allOpportunities: ArbitrageOpportunity[] = [];
 
     for (let i = 0; i < markets.length; i += batchSize) {
       const batch = markets.slice(i, i + batchSize);
-      console.log(`Processing semantic arbitrage batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(markets.length / batchSize)}`);
-      
+      console.log(
+        `Processing semantic arbitrage batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(markets.length / batchSize)}`
+      );
+
       const batchOpportunities = await this.findSemanticArbitrage(batch);
       allOpportunities.push(...batchOpportunities);
     }

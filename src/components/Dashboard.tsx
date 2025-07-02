@@ -1,12 +1,11 @@
-
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, TrendingUp, DollarSign, Activity, Target } from 'lucide-react';
-import { OpportunityChart } from './OpportunityChart';
-import { OpportunityTable } from './OpportunityTable';
-import { StatsCards } from './StatsCards';
-import { generateMockData } from '@/utils/mockData';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LogOut, TrendingUp, DollarSign, Activity, Target } from "lucide-react";
+import { OpportunityChart } from "./OpportunityChart";
+import { OpportunityTable } from "./OpportunityTable";
+import { StatsCards } from "./StatsCards";
+import { generateMockData } from "@/utils/mockData";
 
 interface DashboardProps {
   onLogout: () => void;
@@ -18,7 +17,7 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
     totalProfit: 0,
     activeOpportunities: 0,
     successRate: 0,
-    todaysProfits: 0
+    todaysProfits: 0,
   });
 
   useEffect(() => {
@@ -48,7 +47,9 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white">Arbitrage Bot</h1>
-              <p className="text-sm text-slate-400">Prediction Market Scanner</p>
+              <p className="text-sm text-slate-400">
+                Prediction Market Scanner
+              </p>
             </div>
           </div>
           <Button

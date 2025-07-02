@@ -1,6 +1,6 @@
 // src/clients/kalshi.ts
 
-import { Market, Config } from './types';
+import { Market, Config } from "./types";
 
 interface KalshiAuthResponse {
   token: string;
@@ -32,7 +32,7 @@ export class KalshiClient {
   private token: string | null = null;
   private tokenExpiry: Date | null = null;
 
-  constructor(config: Config['kalshi']) {
+  constructor(config: Config["kalshi"]) {
     this.baseUrl = config.baseUrl;
     this.apiKey = config.apiKey;
   }
@@ -44,9 +44,9 @@ export class KalshiClient {
 
     try {
       const response = await fetch(`${this.baseUrl}/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: process.env.KALSHI_EMAIL,
@@ -67,14 +67,17 @@ export class KalshiClient {
     }
   }
 
-  private async makeAuthenticatedRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
+  private async makeAuthenticatedRequest(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<any> {
     await this.authenticate();
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
         ...options.headers,
       },
     });
@@ -87,7 +90,9 @@ export class KalshiClient {
     }
 
     if (!response.ok) {
-      throw new Error(`Kalshi API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Kalshi API error: ${response.status} ${response.statusText}`
+      );
     }
 
     return response.json();
@@ -99,8 +104,8 @@ export class KalshiClient {
 
     do {
       const params = new URLSearchParams({
-        limit: '100',
-        status: 'open',
+        limit: "100",
+        status: "open",
         ...(cursor && { cursor }),
       });
 
@@ -110,7 +115,7 @@ export class KalshiClient {
 
       const parsedMarkets = data.markets.map(this.parseMarketData);
       markets.push(...parsedMarkets);
-      
+
       cursor = data.cursor;
     } while (cursor);
 
@@ -119,8 +124,8 @@ export class KalshiClient {
 
   async fetchMarketsByCategory(category: string): Promise<Market[]> {
     const params = new URLSearchParams({
-      limit: '100',
-      status: 'open',
+      limit: "100",
+      status: "open",
       category,
     });
 
@@ -144,7 +149,7 @@ export class KalshiClient {
     return {
       id: marketData.ticker,
       title: marketData.title,
-      question: `${marketData.title}${marketData.subtitle ? ` - ${marketData.subtitle}` : ''}`,
+      question: `${marketData.title}${marketData.subtitle ? ` - ${marketData.subtitle}` : ""}`,
       yesPrice,
       noPrice,
       volume: marketData.volume,
@@ -153,7 +158,7 @@ export class KalshiClient {
       category: marketData.category,
       subtitle: marketData.subtitle,
       eventId: marketData.event_ticker,
-      status: marketData.status as 'open' | 'closed' | 'settled',
+      status: marketData.status as "open" | "closed" | "settled",
       lastUpdated: new Date(),
     };
   };
@@ -195,6 +200,6 @@ export class KalshiClient {
   }
 }
 
-export const createKalshiClient = (config: Config['kalshi']): KalshiClient => {
+export const createKalshiClient = (config: Config["kalshi"]): KalshiClient => {
   return new KalshiClient(config);
 };

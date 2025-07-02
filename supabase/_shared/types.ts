@@ -1,4 +1,3 @@
-
 export interface Market {
   id: string;
   title: string;
@@ -11,7 +10,7 @@ export interface Market {
   category: string;
   subtitle?: string;
   eventId: string;
-  status: 'open' | 'closed' | 'settled';
+  status: "open" | "closed" | "settled";
   lastUpdated: Date;
 }
 
@@ -26,17 +25,17 @@ export interface ArbitrageOpportunity {
   reasoning: string;
   timeToExpiry: number; // days
   requiredInvestment: number;
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
   detectedAt: Date;
 }
 
-export type ArbitrageType = 
-  | 'semantic'
-  | 'logical_implication' 
-  | 'temporal'
-  | 'complementary'
-  | 'correlation'
-  | 'synthetic';
+export type ArbitrageType =
+  | "semantic"
+  | "logical_implication"
+  | "temporal"
+  | "complementary"
+  | "correlation"
+  | "synthetic";
 
 export interface TradingStrategy {
   actions: TradingAction[];
@@ -47,17 +46,17 @@ export interface TradingStrategy {
 
 export interface TradingAction {
   marketId: string;
-  side: 'yes' | 'no';
+  side: "yes" | "no";
   price: number;
   quantity: number;
-  orderType: 'limit' | 'market';
+  orderType: "limit" | "market";
 }
 
 export interface Config {
   kalshi: {
     apiKey: string;
     baseUrl: string;
-    environment: 'demo' | 'production';
+    environment: "demo" | "production";
   };
   openai: {
     apiKey: string;
@@ -69,12 +68,12 @@ export interface Config {
     minTimeThreshold: number; // days
     maxTimeThreshold: number;
     transactionCostPercentage: number;
-    riskTolerance: 'conservative' | 'moderate' | 'aggressive';
+    riskTolerance: "conservative" | "moderate" | "aggressive";
   };
   monitoring: {
     checkIntervalMinutes: number;
     alertThreshold: number;
-    logLevel: 'debug' | 'info' | 'warn' | 'error';
+    logLevel: "debug" | "info" | "warn" | "error";
   };
 }
 
@@ -89,7 +88,7 @@ export interface ImplicationRule {
   higherThreshold: number;
   lowerThreshold: number;
   metric: string;
-  direction: 'above' | 'below';
+  direction: "above" | "below";
 }
 
 export interface CorrelationRule {
@@ -119,6 +118,6 @@ export interface MarketMetrics {
 export interface NumericalExtraction {
   value: number;
   metric: string;
-  direction: 'above' | 'below' | 'equal';
+  direction: "above" | "below" | "equal";
   unit?: string;
 }
