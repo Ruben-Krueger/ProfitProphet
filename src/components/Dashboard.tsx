@@ -13,28 +13,6 @@ interface DashboardProps {
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [opportunities, setOpportunities] = useState<any[]>([]);
-  const [stats, setStats] = useState({
-    totalProfit: 0,
-    activeOpportunities: 0,
-    successRate: 0,
-    todaysProfits: 0,
-  });
-
-  useEffect(() => {
-    // Generate initial mock data
-    const mockData = generateMockData();
-    setOpportunities(mockData.opportunities);
-    setStats(mockData.stats);
-
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      const newData = generateMockData();
-      setOpportunities(newData.opportunities);
-      setStats(newData.stats);
-    }, 30000); // Update every 30 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -67,7 +45,6 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
       {/* Main Content */}
       <main className="p-6 space-y-6">
         {/* Stats Cards */}
-        <StatsCards stats={stats} />
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
