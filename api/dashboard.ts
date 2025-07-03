@@ -96,4 +96,4 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
   }
 }
 
-module.exports = withAuth(handler);
+export default withAuth(handler);
