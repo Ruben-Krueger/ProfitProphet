@@ -19,7 +19,7 @@ export const loadConfig = (): Config => {
     kalshi: {
       privateKey: process.env.KALSHI_PRIVATE_KEY!,
       keyId: process.env.KALSHI_KEY_ID!,
-      baseUrl: "https://trading-api.kalshi.com/trade-api/v2",
+      baseUrl: "https://api.elections.kalshi.com/trade-api/v2",
       environment: "production",
     },
     openai: {

@@ -57,7 +57,7 @@ export interface Config {
     privateKey: string;
     keyId: string;
     baseUrl: string;
-    environment: "demo" | "production";
+    environment: "production";
   };
   openai: {
     apiKey: string;

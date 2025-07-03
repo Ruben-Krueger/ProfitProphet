@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogOut, TrendingUp, DollarSign, Activity, Target } from "lucide-react";
-import { OpportunityChart } from "./OpportunityChart";
 import { OpportunityTable } from "./OpportunityTable";
-import { StatsCards } from "./StatsCards";
 import { useDashboard } from "../hooks";
 import { Markets } from "./Markets";
 import { useState } from "react";
@@ -116,7 +114,6 @@ export function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            {/* You can add more overview stats here if needed */}
           </div>
         )}
         {activeTab === "markets" && (

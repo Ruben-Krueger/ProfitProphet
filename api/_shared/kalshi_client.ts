@@ -37,21 +37,28 @@ export class KalshiClient {
     // Create the message string to sign: timestamp + method + path
     const message = timestamp + method + path;
 
-    // Load the private key
-    const privateKey = crypto.createPrivateKey({
-      key: this.privateKey,
-      format: "pem",
-    });
+    try {
+      // Load the private key
+      const privateKey = crypto.createPrivateKey({
+        key: this.privateKey,
+        format: "pem",
+      });
 
-    // Sign the message using RSA-PSS with SHA256
-    const signature = crypto.sign("sha256", Buffer.from(message, "utf-8"), {
-      key: privateKey,
-      padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-      saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
-    });
+      // Sign the message using RSA-PSS with SHA256
+      const signature = crypto.sign("sha256", Buffer.from(message, "utf-8"), {
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+        saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
+      });
 
-    // Return base64 encoded signature
-    return signature.toString("base64");
+      // Return base64 encoded signature
+      return signature.toString("base64");
+    } catch (error) {
+      console.error("Error signing request:", error);
+      throw new Error(
+        `Failed to sign request: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
   }
 
   private async makeAuthenticatedRequest(
@@ -77,8 +84,18 @@ export class KalshiClient {
     });
 
     if (!response.ok) {
+      // Enhanced error logging
+      const errorText = await response.text();
+      console.error("Kalshi API Error Details:", {
+        status: response.status,
+        statusText: response.statusText,
+        url: `${this.baseUrl}${endpoint}`,
+        responseText: errorText,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+
       throw new Error(
-        `Kalshi API error: ${response.status} ${response.statusText}`
+        `Kalshi API error: ${response.status} ${response.statusText} - ${errorText}`
       );
     }
 
@@ -132,6 +149,15 @@ export class KalshiClient {
   async fetchMarketDetails(marketId: string): Promise<Market> {
     const data = await this.makeAuthenticatedRequest(`/markets/${marketId}`);
     return this.parseMarketData(data.market);
+  }
+
+  // Public method for testing authentication
+  async testAuthentication(): Promise<any> {
+    try {
+      return await this.makeAuthenticatedRequest("/user");
+    } catch (error) {
+      throw error;
+    }
   }
 
   private parseMarketData = (marketData: any): Market => {

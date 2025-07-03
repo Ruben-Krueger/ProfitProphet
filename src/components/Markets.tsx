@@ -72,7 +72,11 @@ export const Markets = () => {
             <CardContent className="p-6">
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
-                  <a href={`${getKalshiURL(market.eventId)}`}>
+                  <a
+                    href={getKalshiURL(market.eventId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <h3 className="text-lg font-semibold text-white">
                       {market.title}
                     </h3>
