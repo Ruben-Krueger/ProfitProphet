@@ -6,13 +6,21 @@ import { OpportunityTable } from "./OpportunityTable";
 import { StatsCards } from "./StatsCards";
 import { useDashboard } from "../hooks";
 import { Markets } from "./Markets";
+import { useState } from "react";
+import useAuth from "@/hooks/useAuth";
 
-interface DashboardProps {
-  onLogout: () => void;
-}
+export function Dashboard() {
+  const {
+    data: dashboardData,
+    isLoading,
+    error,
+    dataUpdatedAt,
+  } = useDashboard();
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "markets" | "opportunities"
+  >("overview");
 
-export const Dashboard = ({ onLogout }: DashboardProps) => {
-  const { data: dashboardData, isLoading, error } = useDashboard();
+  const { handleLogout } = useAuth();
 
   if (isLoading) {
     return (
@@ -47,7 +55,7 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
             </div>
           </div>
           <Button
-            onClick={onLogout}
+            onClick={handleLogout}
             variant="outline"
             size="sm"
             className="border-slate-600 text-slate-300 hover:bg-slate-700"
@@ -58,57 +66,85 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         </div>
       </header>
 
+      {/* Tab Navigation */}
+      <nav className="flex space-x-4 px-6 pt-6">
+        <button
+          className={`px-4 py-2 rounded-t bg-slate-800 border-b-2 ${activeTab === "overview" ? "border-emerald-400 text-emerald-400" : "border-transparent text-slate-300"}`}
+          onClick={() => setActiveTab("overview")}
+        >
+          Overview
+        </button>
+        <button
+          className={`px-4 py-2 rounded-t bg-slate-800 border-b-2 ${activeTab === "markets" ? "border-emerald-400 text-emerald-400" : "border-transparent text-slate-300"}`}
+          onClick={() => setActiveTab("markets")}
+        >
+          Markets
+        </button>
+        <button
+          className={`px-4 py-2 rounded-t bg-slate-800 border-b-2 ${activeTab === "opportunities" ? "border-emerald-400 text-emerald-400" : "border-transparent text-slate-300"}`}
+          onClick={() => setActiveTab("opportunities")}
+        >
+          Opportunities
+        </button>
+      </nav>
+
       {/* Main Content */}
-      <main className="p-6 space-y-6">
-        {/* Stats Cards */}
-        {dashboardData && <StatsCards stats={dashboardData.stats} />}
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <Activity className="h-5 w-5 mr-2 text-emerald-400" />
-                Opportunities Over Time
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <OpportunityChart data={dashboardData?.chartData.byType || []} />
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <Target className="h-5 w-5 mr-2 text-emerald-400" />
-                Profit Distribution
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-center justify-center text-slate-400">
-                Profit distribution chart placeholder
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Opportunities Table */}
-        <Card className="bg-slate-800 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center">
-              <DollarSign className="h-5 w-5 mr-2 text-emerald-400" />
-              Recent Opportunities
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <OpportunityTable
-              opportunities={dashboardData?.recentOpportunities || []}
-            />
-          </CardContent>
-        </Card>
-
-        <Markets />
+      <main className="p-6">
+        {activeTab === "overview" && (
+          <div className="space-y-6">
+            {/* Overview: Total Markets and Last Fetch Time */}
+            <Card className="bg-slate-800 border-slate-700 max-w-md mb-6">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <Activity className="h-5 w-5 mr-2 text-emerald-400" />
+                  Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2 text-slate-200">
+                  <div>
+                    Total Markets:{" "}
+                    <span className="font-bold text-emerald-400">
+                      {dashboardData?.stats.totalMarkets ?? "-"}
+                    </span>
+                  </div>
+                  <div>
+                    Last Fetched:{" "}
+                    <span className="text-slate-400">
+                      {dataUpdatedAt
+                        ? new Date(dataUpdatedAt).toLocaleString()
+                        : "-"}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* You can add more overview stats here if needed */}
+          </div>
+        )}
+        {activeTab === "markets" && (
+          <div>
+            <Markets />
+          </div>
+        )}
+        {activeTab === "opportunities" && (
+          <div>
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <DollarSign className="h-5 w-5 mr-2 text-emerald-400" />
+                  Recent Opportunities
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <OpportunityTable
+                  opportunities={dashboardData?.recentOpportunities || []}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </main>
     </div>
   );
-};
+}

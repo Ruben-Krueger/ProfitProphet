@@ -1,33 +1,19 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import useAuth from "@/hooks/useAuth";
 import { TrendingUp } from "lucide-react";
+import { useState } from "react";
 
-interface LoginFormProps {
-  onLogin: (username: string, password: string) => Promise<boolean>;
-}
-
-export const LoginForm = ({ onLogin }: LoginFormProps) => {
+export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
+  const { isLoading, handleLogin, error } = useAuth();
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const success = await onLogin(username, password);
-    if (!success) {
-      setError("Invalid credentials");
-    }
-    setIsLoading(false);
-  };
+  async function handleSubmit() {
+    await handleLogin(username, password);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 flex items-center justify-center p-4">
@@ -65,7 +51,9 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                 required
               />
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && (
+              <p className="text-red-400 text-sm">{JSON.stringify(error)}</p>
+            )}
             <Button
               type="submit"
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -78,4 +66,4 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
       </Card>
     </div>
   );
-};
+}
