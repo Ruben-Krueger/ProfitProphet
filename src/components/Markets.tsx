@@ -31,6 +31,8 @@ export const Markets = () => {
     );
   }
 
+  console.log(data.markets);
+
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -73,7 +75,7 @@ export const Markets = () => {
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
                   <a
-                    href={getKalshiURL(market.eventId)}
+                    href={getKalshiURL(market.id, market.title)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
