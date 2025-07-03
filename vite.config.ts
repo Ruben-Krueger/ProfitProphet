@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -19,16 +18,5 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist",
-    rollupOptions: {
-      input: {
-        hourly: "api/cron/hourly.ts",
-        dashboard: "api/dashboard.ts",
-      },
-      output: {
-        entryFileNames: "[name].js",
-      },
-    },
-    target: "node18",
-    minify: false,
   },
 }));
