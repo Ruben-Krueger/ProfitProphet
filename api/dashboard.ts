@@ -1,5 +1,5 @@
 import type { VercelResponse } from "@vercel/node";
-import { prisma } from "./_shared/prisma";
+import { prisma } from "./_shared/prisma.js";
 import { withAuth, AuthenticatedRequest } from "./_shared/auth";
 
 async function handler(req: AuthenticatedRequest, res: VercelResponse) {

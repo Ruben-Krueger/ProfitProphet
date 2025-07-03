@@ -1,10 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import nullThrows from "nullthrows";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { prisma } from "../_shared/prisma";
+import { prisma } from "./_shared/prisma";
+
 import { KalshiClient } from "../_shared/kalshi_client";
 import { createKalshiClient } from "../_shared/kalshi_client";
-import { Config } from "../_shared/types";
 import { loadConfig } from "../_shared/config_module";
 import { createLogger } from "../_shared/logger";
 
