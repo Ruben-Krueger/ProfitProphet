@@ -17,4 +17,18 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    outDir: "dist",
+    rollupOptions: {
+      input: {
+        hourly: "api/cron/hourly.ts",
+        dashboard: "api/dashboard.ts",
+      },
+      output: {
+        entryFileNames: "[name].js",
+      },
+    },
+    target: "node18",
+    minify: false,
+  },
 }));
