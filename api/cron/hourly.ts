@@ -1,5 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
-import nullThrows from "nullthrows";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { prisma } from "../_shared/prisma";
 
