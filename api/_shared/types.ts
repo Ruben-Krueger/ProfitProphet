@@ -35,7 +35,8 @@ export type ArbitrageType =
   | "temporal"
   | "complementary"
   | "correlation"
-  | "synthetic";
+  | "synthetic"
+  | "spread_capture";
 
 export interface TradingStrategy {
   actions: TradingAction[];
@@ -121,4 +122,14 @@ export interface NumericalExtraction {
   metric: string;
   direction: "above" | "below" | "equal";
   unit?: string;
+}
+
+export interface SpreadCaptureMetrics {
+  bidAskSpread: number;
+  spreadPercentage: number;
+  volume24h: number;
+  openInterest: number;
+  timeToExpiry: number;
+  impliedVolatility: number;
+  spreadCaptureScore: number;
 }

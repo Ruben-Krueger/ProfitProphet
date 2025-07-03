@@ -48,7 +48,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Store markets in database using Prisma
     let insertedCount = 0;
     let updatedCount = 0;
-
     for (const market of filteredMarkets) {
       // Check if market already exists
       const existingMarket = await prisma.market.findUnique({
