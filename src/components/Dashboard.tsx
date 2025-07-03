@@ -8,6 +8,7 @@ import { useDashboard } from "../hooks";
 import { Markets } from "./Markets";
 import { useState } from "react";
 import useAuth from "@/hooks/useAuth";
+import Loading from "./Loading";
 
 export function Dashboard() {
   const {
@@ -23,11 +24,7 @@ export function Dashboard() {
   const { handleLogout } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error) {

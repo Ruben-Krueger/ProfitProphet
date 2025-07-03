@@ -28,6 +28,11 @@ export function getApiBaseUrl(): string {
     return import.meta.env.VITE_API_BASE_URL;
   }
 
+  // For development, use Vercel dev server
+  if (import.meta.env.DEV) {
+    return "http://localhost:3000";
+  }
+
   // For development, use relative URLs to avoid CORS issues
   return "";
 }

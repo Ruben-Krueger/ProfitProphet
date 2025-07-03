@@ -139,8 +139,8 @@ export class KalshiClient {
     const yesPrice = (marketData.yes_bid + marketData.yes_ask) / 2 / 100; // Convert cents to dollars
     const noPrice = (marketData.no_bid + marketData.no_ask) / 2 / 100;
 
-    // Parse resolution date with validation
-    let resolutionDate: Date;
+    // Fallback to epoch time (Jan 1, 1970)
+    let resolutionDate = new Date(0);
     if (
       marketData.close_ts &&
       typeof marketData.close_ts === "number" &&

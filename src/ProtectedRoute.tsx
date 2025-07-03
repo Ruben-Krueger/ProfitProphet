@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import useAuth from "./hooks/useAuth";
+import Loading from "./components/Loading";
 
 export default function ProtectedRoute({
   children,
@@ -8,12 +9,7 @@ export default function ProtectedRoute({
 }) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
-      </div>
-    );
+  if (isLoading) return <Loading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 }

@@ -50,17 +50,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let updatedCount = 0;
 
     for (const market of filteredMarkets) {
-      // Validate resolution date before storing
-      let validResolutionDate = market.resolutionDate;
-      if (!market.resolutionDate || isNaN(market.resolutionDate.getTime())) {
-        logger.warn(
-          { marketId: market.id, resolutionDate: market.resolutionDate },
-          "Invalid resolution date, using epoch time as fallback"
-        );
-        // Set epoch time (Jan 1, 1970) as fallback for markets with invalid resolution dates
-        validResolutionDate = new Date(0);
-      }
-
       // Check if market already exists
       const existingMarket = await prisma.market.findUnique({
         where: { id: market.id },
@@ -76,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           noPrice: market.noPrice,
           volume: market.volume,
           openInterest: market.openInterest,
-          resolutionDate: validResolutionDate,
+          resolutionDate: market.resolutionDate,
           category: market.category,
           subtitle: market.subtitle,
           eventId: market.eventId,
@@ -91,7 +80,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           noPrice: market.noPrice,
           volume: market.volume,
           openInterest: market.openInterest,
-          resolutionDate: validResolutionDate,
+          resolutionDate: market.resolutionDate,
           category: market.category,
           subtitle: market.subtitle,
           eventId: market.eventId,
