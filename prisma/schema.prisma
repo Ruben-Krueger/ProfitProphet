@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Market {
+  id                 String              @id
+  title              String
+  question           String
+  yesPrice           Decimal             @db.Decimal(10, 4)
+  noPrice            Decimal             @db.Decimal(10, 4)
+  volume             Int
+  openInterest       Int
+  resolutionDate     DateTime            @db.Timestamptz(6)
+  category           String
+  subtitle           String?
+  eventId            String
+  status             MarketStatus
+  lastUpdated        DateTime            @default(now()) @db.Timestamptz(6)
+  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
+  marketSnapshots    MarketSnapshot[]
+  opportunityMarkets OpportunityMarket[]
+
+  @@map("markets")
+}
+
+model ArbitrageOpportunity {
+  id                 String              @id @default(cuid())
+  type               ArbitrageType
+  expectedReturn     Decimal             @db.Decimal(10, 4)
+  netReturn          Decimal             @db.Decimal(10, 4)
+  confidence         Decimal             @db.Decimal(5, 4)
+  strategy           Json
+  reasoning          String
+  timeToExpiry       Int
+  requiredInvestment Decimal             @db.Decimal(15, 2)
+  riskLevel          RiskLevel
+  detectedAt         DateTime            @default(now()) @db.Timestamptz(6)
+  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
+  executionLogs      ExecutionLog[]
+  opportunityMarkets OpportunityMarket[]
+
+  @@map("arbitrage_opportunities")
+}
+
+model OpportunityMarket {
+  opportunityId String               @db.VarChar(255)
+  marketId      String               @db.VarChar(255)
+  market        Market               @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  opportunity   ArbitrageOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@id([opportunityId, marketId])
+  @@map("opportunity_markets")
+}
+
+model MarketSnapshot {
+  id           String   @id @default(cuid())
+  marketId     String   @db.VarChar(255)
+  yesPrice     Decimal  @db.Decimal(10, 4)
+  noPrice      Decimal  @db.Decimal(10, 4)
+  volume       Int
+  openInterest Int
+  capturedAt   DateTime @default(now()) @db.Timestamptz(6)
+  market       Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@map("market_snapshots")
+}
+
+model ExecutionLog {
+  id            String                @id @default(cuid())
+  opportunityId String?               @db.VarChar(255)
+  actionType    String
+  details       Json?
+  executedAt    DateTime              @default(now()) @db.Timestamptz(6)
+  opportunity   ArbitrageOpportunity? @relation(fields: [opportunityId], references: [id])
+
+  @@map("execution_logs")
+}
+
+enum MarketStatus {
+  active
+  closed
+  settled
+}
+
+enum ArbitrageType {
+  semantic
+  logical_implication
+  temporal
+  complementary
+  correlation
+  synthetic
+}
+
+enum RiskLevel {
+  low
+  medium
+  high
+}

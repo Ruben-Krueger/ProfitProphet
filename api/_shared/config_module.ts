@@ -1,7 +1,11 @@
 import { Config } from "./types";
 
 export const loadConfig = (): Config => {
-  const requiredEnvVars = ["KALSHI_API_KEY", "OPENAI_API_KEY"];
+  const requiredEnvVars = [
+    "KALSHI_PRIVATE_KEY",
+    "KALSHI_KEY_ID",
+    "OPENAI_API_KEY",
+  ];
 
   // Check required environment variables
   for (const envVar of requiredEnvVars) {
@@ -12,7 +16,8 @@ export const loadConfig = (): Config => {
 
   return {
     kalshi: {
-      apiKey: process.env.KALSHI_API_KEY!,
+      privateKey: process.env.KALSHI_PRIVATE_KEY!,
+      keyId: process.env.KALSHI_KEY_ID!,
       baseUrl:
         process.env.KALSHI_ENVIRONMENT === "production"
           ? "https://trading-api.kalshi.com/trade-api/v2"

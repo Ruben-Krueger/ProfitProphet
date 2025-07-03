@@ -1,11 +1,7 @@
 // src/clients/kalshi.ts
 
 import { Market, Config } from "./types";
-
-interface KalshiAuthResponse {
-  token: string;
-  expiry: string;
-}
+import * as crypto from "crypto";
 
 interface KalshiMarketResponse {
   markets: Array<{
@@ -28,66 +24,57 @@ interface KalshiMarketResponse {
 
 export class KalshiClient {
   private baseUrl: string;
-  private apiKey: string;
-  private token: string | null = null;
-  private tokenExpiry: Date | null = null;
+  private privateKey: string;
+  private keyId: string;
 
   constructor(config: Config["kalshi"]) {
     this.baseUrl = config.baseUrl;
-    this.apiKey = config.apiKey;
+    this.privateKey = config.privateKey;
+    this.keyId = config.keyId;
   }
 
-  private async authenticate(): Promise<void> {
-    if (this.token && this.tokenExpiry && new Date() < this.tokenExpiry) {
-      return; // Token still valid
-    }
+  private signRequest(timestamp: string, method: string, path: string): string {
+    // Create the message string to sign: timestamp + method + path
+    const message = timestamp + method + path;
 
-    try {
-      const response = await fetch(`${this.baseUrl}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: process.env.KALSHI_EMAIL,
-          password: process.env.KALSHI_PASSWORD,
-        }),
-      });
+    // Load the private key
+    const privateKey = crypto.createPrivateKey({
+      key: this.privateKey,
+      format: "pem",
+    });
 
-      if (!response.ok) {
-        throw new Error(`Authentication failed: ${response.statusText}`);
-      }
+    // Sign the message using RSA-PSS with SHA256
+    const signature = crypto.sign("sha256", Buffer.from(message, "utf-8"), {
+      key: privateKey,
+      padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+      saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
+    });
 
-      const data: KalshiAuthResponse = await response.json();
-      this.token = data.token;
-      // Tokens expire in 30 minutes, set expiry to 25 minutes for safety
-      this.tokenExpiry = new Date(Date.now() + 25 * 60 * 1000);
-    } catch (error) {
-      throw new Error(`Failed to authenticate with Kalshi: ${error}`);
-    }
+    // Return base64 encoded signature
+    return signature.toString("base64");
   }
 
   private async makeAuthenticatedRequest(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<any> {
-    await this.authenticate();
+    // Generate timestamp in milliseconds
+    const timestamp = Date.now().toString();
+    const method = options.method || "GET";
+
+    // Sign the request
+    const signature = this.signRequest(timestamp, method, endpoint);
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers: {
-        Authorization: `Bearer ${this.token}`,
+        "KALSHI-ACCESS-KEY": this.keyId,
+        "KALSHI-ACCESS-SIGNATURE": signature,
+        "KALSHI-ACCESS-TIMESTAMP": timestamp,
         "Content-Type": "application/json",
         ...options.headers,
       },
     });
-
-    if (response.status === 401) {
-      // Token expired, re-authenticate and retry
-      this.token = null;
-      await this.authenticate();
-      return this.makeAuthenticatedRequest(endpoint, options);
-    }
 
     if (!response.ok) {
       throw new Error(
@@ -98,7 +85,7 @@ export class KalshiClient {
     return response.json();
   }
 
-  async fetchAllMarkets(): Promise<Market[]> {
+  async fetchAllMarkets(limit?: number): Promise<Market[]> {
     const markets: Market[] = [];
     let cursor: string | undefined;
 
@@ -117,9 +104,15 @@ export class KalshiClient {
       markets.push(...parsedMarkets);
 
       cursor = data.cursor;
+
+      // If a limit is specified and we've reached it, break out of the loop
+      if (limit && markets.length >= limit) {
+        break;
+      }
     } while (cursor);
 
-    return markets;
+    // Return only up to the specified limit
+    return limit ? markets.slice(0, limit) : markets;
   }
 
   async fetchMarketsByCategory(category: string): Promise<Market[]> {
@@ -146,6 +139,22 @@ export class KalshiClient {
     const yesPrice = (marketData.yes_bid + marketData.yes_ask) / 2 / 100; // Convert cents to dollars
     const noPrice = (marketData.no_bid + marketData.no_ask) / 2 / 100;
 
+    // Parse resolution date with validation
+    let resolutionDate: Date;
+    if (
+      marketData.close_ts &&
+      typeof marketData.close_ts === "number" &&
+      marketData.close_ts > 0
+    ) {
+      resolutionDate = new Date(marketData.close_ts * 1000);
+      // Validate the parsed date
+      if (isNaN(resolutionDate.getTime())) {
+        resolutionDate = new Date(0); // Fallback to epoch time (Jan 1, 1970)
+      }
+    } else {
+      resolutionDate = new Date(0); // Fallback to epoch time (Jan 1, 1970)
+    }
+
     return {
       id: marketData.ticker,
       title: marketData.title,
@@ -154,11 +163,11 @@ export class KalshiClient {
       noPrice,
       volume: marketData.volume,
       openInterest: marketData.open_interest,
-      resolutionDate: new Date(marketData.close_ts * 1000),
+      resolutionDate,
       category: marketData.category,
       subtitle: marketData.subtitle,
       eventId: marketData.event_ticker,
-      status: marketData.status as "open" | "closed" | "settled",
+      status: marketData.status as "active" | "closed" | "settled",
       lastUpdated: new Date(),
     };
   };

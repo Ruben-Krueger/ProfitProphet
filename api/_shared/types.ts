@@ -10,7 +10,7 @@ export interface Market {
   category: string;
   subtitle?: string;
   eventId: string;
-  status: "open" | "closed" | "settled";
+  status: "active" | "closed" | "settled";
   lastUpdated: Date;
 }
 
@@ -54,7 +54,8 @@ export interface TradingAction {
 
 export interface Config {
   kalshi: {
-    apiKey: string;
+    privateKey: string;
+    keyId: string;
     baseUrl: string;
     environment: "demo" | "production";
   };

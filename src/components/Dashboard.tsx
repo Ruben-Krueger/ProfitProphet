@@ -1,18 +1,39 @@
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogOut, TrendingUp, DollarSign, Activity, Target } from "lucide-react";
 import { OpportunityChart } from "./OpportunityChart";
 import { OpportunityTable } from "./OpportunityTable";
 import { StatsCards } from "./StatsCards";
-import { generateMockData } from "@/utils/mockData";
+import { useDashboard } from "../hooks";
 
 interface DashboardProps {
   onLogout: () => void;
 }
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
-  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const { data: dashboardData, isLoading, error } = useDashboard();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    // If it's an authentication error, trigger logout
+    if (error.message === "Authentication required") {
+      onLogout();
+      return null;
+    }
+
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-red-400">Error: {error.message}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -45,6 +66,7 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
       {/* Main Content */}
       <main className="p-6 space-y-6">
         {/* Stats Cards */}
+        {dashboardData && <StatsCards stats={dashboardData.stats} />}
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -56,7 +78,7 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <OpportunityChart data={opportunities} />
+              <OpportunityChart data={dashboardData?.chartData.byType || []} />
             </CardContent>
           </Card>
 
@@ -80,11 +102,13 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
           <CardHeader>
             <CardTitle className="text-white flex items-center">
               <DollarSign className="h-5 w-5 mr-2 text-emerald-400" />
-              Active Opportunities
+              Recent Opportunities
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <OpportunityTable opportunities={opportunities} />
+            <OpportunityTable
+              opportunities={dashboardData?.recentOpportunities || []}
+            />
           </CardContent>
         </Card>
       </main>

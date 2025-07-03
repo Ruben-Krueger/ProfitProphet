@@ -1,0 +1,18 @@
+{
+  "functions": {
+    "api/**.ts": {
+      "maxDuration": 120
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/hourly",
+      "schedule": "0 * * * *"
+    }
+  ],
+  "env": {
+    "SUPABASE_URL": "@supabase-url",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-key",
+    "CRON_SECRET": "@cron-secret"
+  }
+}

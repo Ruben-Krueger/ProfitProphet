@@ -33,3 +33,5 @@ Thumbs.db
 # Misc
 coverage/
 .nyc_output/ 
+
+.temp

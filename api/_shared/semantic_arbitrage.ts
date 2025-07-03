@@ -5,7 +5,7 @@ import {
   ArbitrageOpportunity,
   SemanticSimilarity,
   Config,
-} from "../types";
+} from "./types";
 import { calculateBasicArbitrage } from "./utils";
 
 interface OpenAIResponse {

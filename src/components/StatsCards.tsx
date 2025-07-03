@@ -3,10 +3,10 @@ import { TrendingUp, DollarSign, Target, Activity } from "lucide-react";
 
 interface StatsCardsProps {
   stats: {
-    totalProfit: number;
-    activeOpportunities: number;
-    successRate: number;
-    todaysProfits: number;
+    totalMarkets: number;
+    totalOpportunities: number;
+    activeMarkets: number;
+    avgExpectedReturn: number;
   };
 }
 
@@ -24,29 +24,29 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
 
   const cardData = [
     {
-      title: "Total Profit",
-      value: formatCurrency(stats.totalProfit),
+      title: "Total Markets",
+      value: stats.totalMarkets.toString(),
       icon: DollarSign,
       color: "text-emerald-400",
       bgColor: "bg-emerald-500/10",
     },
     {
-      title: "Active Opportunities",
-      value: stats.activeOpportunities.toString(),
+      title: "Total Opportunities",
+      value: stats.totalOpportunities.toString(),
       icon: Activity,
       color: "text-blue-400",
       bgColor: "bg-blue-500/10",
     },
     {
-      title: "Success Rate",
-      value: formatPercentage(stats.successRate),
+      title: "Active Markets",
+      value: stats.activeMarkets.toString(),
       icon: Target,
       color: "text-purple-400",
       bgColor: "bg-purple-500/10",
     },
     {
-      title: "Today's Profits",
-      value: formatCurrency(stats.todaysProfits),
+      title: "Avg Expected Return",
+      value: formatPercentage(stats.avgExpectedReturn),
       icon: TrendingUp,
       color: "text-orange-400",
       bgColor: "bg-orange-500/10",
