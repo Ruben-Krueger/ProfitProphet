@@ -1,12 +1,10 @@
-// src/calculators/semantic.ts
-
+import calculateBasicArbitrage from "./calculateBasicArbitrage";
 import {
   Market,
   ArbitrageOpportunity,
   SemanticSimilarity,
   Config,
 } from "./types";
-import { calculateBasicArbitrage } from "./utils";
 
 interface OpenAIResponse {
   choices: Array<{
