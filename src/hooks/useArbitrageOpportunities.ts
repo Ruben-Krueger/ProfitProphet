@@ -69,6 +69,7 @@ export const useArbitrageOpportunities = (
       }
       return response.json();
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 60 * 60 * 1000, // 60 minutes - matches backend refresh rate
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours - keep in cache longer
   });
 };

@@ -42,7 +42,7 @@ export const useDashboard = () => {
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 };

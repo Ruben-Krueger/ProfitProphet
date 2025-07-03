@@ -53,7 +53,7 @@ export function Dashboard() {
             onClick={handleLogout}
             variant="outline"
             size="sm"
-            className="border-slate-600 text-slate-300 hover:bg-slate-700"
+            className="bg-slate-800 border border-slate-700 text-white hover:bg-slate-600 rounded shadow-sm"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Logout
