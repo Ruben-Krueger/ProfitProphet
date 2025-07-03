@@ -5,6 +5,7 @@ export const loadConfig = (): Config => {
     "KALSHI_PRIVATE_KEY",
     "KALSHI_KEY_ID",
     "OPENAI_API_KEY",
+    "DATABASE_URL",
   ];
 
   // Check required environment variables
