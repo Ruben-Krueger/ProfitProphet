@@ -41,6 +41,8 @@ export function findSpreadCaptureOpportunities(
 
     const metrics = calculateSpreadCaptureMetrics(market);
 
+    console.log(metrics);
+
     // Check if market meets basic criteria
     if (!meetsBasicCriteria(market, metrics, config)) continue;
 
@@ -66,13 +68,23 @@ function calculateSpreadCaptureMetrics(market: Market): SpreadCaptureMetrics {
 
   // Calculate bid-ask spread (difference between yes and no prices)
   const bidAskSpread = Math.abs(yesPrice - noPrice);
-  const spreadPercentage = (bidAskSpread / Math.min(yesPrice, noPrice)) * 100;
+  const minPrice = Math.min(yesPrice, noPrice);
+  const spreadPercentage = minPrice > 0 ? (bidAskSpread / minPrice) * 100 : 0;
 
   // Calculate time to expiry in days
   const timeToExpiry = Math.max(
     0,
     (market.resolutionDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   );
+
+  // Debug logging for edge cases
+  if (timeToExpiry === 0) {
+    console.log(`Market ${market.id} has expired or invalid resolution date:`, {
+      resolutionDate: market.resolutionDate,
+      now: new Date(),
+      timeDiff: market.resolutionDate.getTime() - Date.now(),
+    });
+  }
 
   // Calculate implied volatility (simplified - based on price spread and time)
   const impliedVolatility = calculateImpliedVolatility(
@@ -111,11 +123,16 @@ function calculateImpliedVolatility(
   const priceSpread = Math.abs(yesPrice - noPrice);
   const midPrice = (yesPrice + noPrice) / 2;
 
+  // Handle edge cases to prevent NaN
+  if (midPrice === 0 || timeToExpiry < 0) {
+    return 0;
+  }
+
   // Higher spread relative to mid price indicates higher volatility
   const volatilityRatio = priceSpread / midPrice;
 
   // Adjust for time decay (longer time = higher potential volatility)
-  const timeAdjustment = Math.sqrt(timeToExpiry / 365);
+  const timeAdjustment = Math.sqrt(Math.max(0, timeToExpiry) / 365);
 
   return Math.min(volatilityRatio * timeAdjustment * 100, 100); // Cap at 100%
 }
@@ -128,6 +145,17 @@ function calculateSpreadCaptureScore(metrics: {
   impliedVolatility: number;
 }): number {
   let score = 0;
+
+  // Handle NaN values
+  if (
+    isNaN(metrics.spreadPercentage) ||
+    isNaN(metrics.volume) ||
+    isNaN(metrics.openInterest) ||
+    isNaN(metrics.timeToExpiry) ||
+    isNaN(metrics.impliedVolatility)
+  ) {
+    return 0;
+  }
 
   // Spread component (40% weight)
   const spreadScore = Math.min(metrics.spreadPercentage * 10, 40);
