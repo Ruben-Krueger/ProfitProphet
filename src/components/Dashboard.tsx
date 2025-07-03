@@ -16,18 +16,12 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading dashboard...</div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
       </div>
     );
   }
 
   if (error) {
-    // If it's an authentication error, trigger logout
-    if (error.message === "Authentication required") {
-      onLogout();
-      return null;
-    }
-
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-red-400">Error: {error.message}</div>
