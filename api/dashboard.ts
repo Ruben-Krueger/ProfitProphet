@@ -1,6 +1,7 @@
 import type { VercelResponse } from "@vercel/node";
 import { prisma } from "./_shared/prisma.js";
 import { withAuth, AuthenticatedRequest } from "./_shared/auth.js";
+import { withCors } from "./_shared/cors.js";
 
 async function handler(req: AuthenticatedRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -96,4 +97,4 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
   }
 }
 
-export default withAuth(handler);
+export default withCors(withAuth(handler));

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createAuthHeaders } from "../utils/auth";
+import { getApiBaseUrl } from "@/lib/utils";
 
 interface OpportunityMarket {
   opportunityId: string;
@@ -64,7 +65,7 @@ export const useOpportunityMarkets = (
 
       const headers = await createAuthHeaders();
       const response = await fetch(
-        `/api/opportunity-markets?${searchParams.toString()}`,
+        `${getApiBaseUrl}/api/opportunity-markets?${searchParams.toString()}`,
         { headers }
       );
       if (!response.ok) {

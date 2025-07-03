@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createAuthHeaders } from "../utils/auth";
+import { getApiBaseUrl } from "../lib/utils";
 
 interface ArbitrageOpportunity {
   id: string;
@@ -60,7 +61,7 @@ export const useArbitrageOpportunities = (
 
       const headers = await createAuthHeaders();
       const response = await fetch(
-        `/api/arbitrage-opportunities?${searchParams.toString()}`,
+        `${getApiBaseUrl()}/api/arbitrage-opportunities?${searchParams.toString()}`,
         { headers }
       );
       if (!response.ok) {

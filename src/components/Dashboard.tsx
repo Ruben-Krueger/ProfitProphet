@@ -5,6 +5,7 @@ import { OpportunityChart } from "./OpportunityChart";
 import { OpportunityTable } from "./OpportunityTable";
 import { StatsCards } from "./StatsCards";
 import { useDashboard } from "../hooks";
+import { Markets } from "./Markets";
 
 interface DashboardProps {
   onLogout: () => void;
@@ -105,6 +106,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
             />
           </CardContent>
         </Card>
+
+        <Markets />
       </main>
     </div>
   );

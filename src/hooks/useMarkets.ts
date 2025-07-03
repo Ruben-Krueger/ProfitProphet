@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createAuthHeaders } from "../utils/auth";
+import { getApiBaseUrl } from "../lib/utils";
 
 interface Market {
   id: string;
@@ -48,14 +49,17 @@ export const useMarkets = (params: UseMarketsParams = {}) => {
       searchParams.append("offset", offset.toString());
 
       const headers = await createAuthHeaders();
-      const response = await fetch(`/api/markets?${searchParams.toString()}`, {
-        headers,
-      });
+      const response = await fetch(
+        `${getApiBaseUrl()}/api/markets?${searchParams.toString()}`,
+        {
+          headers,
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch markets");
       }
       return response.json();
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000, // 5 minutes
   });
 };

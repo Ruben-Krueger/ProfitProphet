@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createAuthHeaders } from "../utils/auth";
+import { getApiBaseUrl } from "../lib/utils";
 
 interface DashboardData {
   stats: {
@@ -21,7 +22,9 @@ export const useDashboard = () => {
     queryFn: async (): Promise<DashboardData> => {
       try {
         const headers = await createAuthHeaders();
-        const response = await fetch("/api/dashboard", { headers });
+        const response = await fetch(`${getApiBaseUrl()}/api/dashboard`, {
+          headers,
+        });
         if (!response.ok) {
           if (response.status === 401) {
             throw new Error("Authentication required");

@@ -21,3 +21,13 @@ export function formatError(error: unknown): { name: string; message: string } {
   }
   return { name: "Error", message: String(error) };
 }
+
+export function getApiBaseUrl(): string {
+  // If VITE_API_BASE_URL is set, use it (for production)
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+
+  // For development, use relative URLs to avoid CORS issues
+  return "";
+}
