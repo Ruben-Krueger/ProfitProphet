@@ -6,6 +6,7 @@ import { loadConfig } from "../_shared/config_module";
 import { createLogger } from "../_shared/logger";
 import { Market as PrismaMarket } from "@prisma/client";
 import { Market } from "../_shared/types";
+import TradingEngine from "api/_shared/trading-engine";
 
 export const config = {
   maxDuration: 300, // 5 minutes for heavy tasks
@@ -44,20 +45,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       "Successfully fetched markets from Kalshi"
     );
 
-    const filteredMarkets = markets;
-
     // Store markets in database using Prisma
 
     // Process markets in batches for better performance
     const BATCH_SIZE = 50;
     const batches: Market[][] = [];
 
-    for (let i = 0; i < filteredMarkets.length; i += BATCH_SIZE) {
-      batches.push(filteredMarkets.slice(i, i + BATCH_SIZE));
+    for (let i = 0; i < markets.length; i += BATCH_SIZE) {
+      batches.push(markets.slice(i, i + BATCH_SIZE));
     }
 
     logger.info(
-      `Processing ${filteredMarkets.length} markets in ${batches.length} batches`
+      `Processing ${markets.length} markets in ${batches.length} batches`
     );
 
     for (const batch of batches) {
@@ -103,11 +102,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await Promise.all(batchPromises);
     }
 
+    // Run arbitrage detection logic
+    const opportunities = TradingEngine(markets);
+
+    logger.info(
+      { opportunitiesCount: opportunities.length },
+      "Successfully detected opportunities"
+    );
+
+    // Store opportunities in database using Prisma
+    if (opportunities.length > 0) {
+      const opportunitiesData = opportunities.map(opportunity => ({
+        id: opportunity.id,
+        type: opportunity.type,
+        expectedReturn: opportunity.expectedReturn,
+        netReturn: opportunity.netReturn,
+        confidence: opportunity.confidence,
+        strategy: JSON.stringify(opportunity.strategy),
+        reasoning: opportunity.reasoning,
+        requiredInvestment: opportunity.requiredInvestment,
+        riskLevel: opportunity.riskLevel,
+        detectedAt: opportunity.detectedAt,
+      }));
+
+      await prisma.arbitrageOpportunity.createMany({
+        data: opportunitiesData,
+      });
+    }
+
     // Since we can't easily track insert vs update without additional queries,
     // we'll just report total processed
-    const totalProcessed = filteredMarkets.length;
-
-    logger.info("Arbitrage detection logic not yet implemented");
+    const totalProcessed = markets.length;
 
     const duration = Date.now() - startTime;
     logger.info(

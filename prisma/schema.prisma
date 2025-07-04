@@ -95,6 +95,7 @@ enum ArbitrageType {
   complementary
   correlation
   synthetic
+  spread_capture
 }
 
 enum RiskLevel {
