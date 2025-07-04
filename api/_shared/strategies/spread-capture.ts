@@ -47,7 +47,7 @@ export function findSpreadCaptureOpportunities(
       config
     );
 
-    if (opportunity.expectedReturn >= config.minExpectedReturn) {
+    if (opportunity && opportunity.expectedReturn >= config.minExpectedReturn) {
       opportunities.push(opportunity);
     }
   }
@@ -93,12 +93,17 @@ function calculateImpliedVolatility(yesPrice: number, noPrice: number): number {
   const midPrice = (yesPrice + noPrice) / 2;
 
   // Handle edge cases to prevent NaN
-  if (midPrice === 0) {
-    return 0;
+  if (midPrice === 0 || isNaN(midPrice) || isNaN(priceSpread)) {
+    return 25; // Default moderate volatility for edge cases
   }
 
   // Higher spread relative to mid price indicates higher current volatility
   const volatilityRatio = priceSpread / midPrice;
+
+  // Handle division by zero or invalid results
+  if (isNaN(volatilityRatio) || !isFinite(volatilityRatio)) {
+    return 25; // Default moderate volatility for invalid calculations
+  }
 
   // For spread capture, we can ignore time to expiry since we're capturing current spreads
   // Just scale to a reasonable range (0-100)
@@ -134,10 +139,6 @@ function calculateSpreadCaptureScore(metrics: {
   // Open interest component (20% weight)
   const openInterestScore = Math.min((metrics.openInterest / 500) * 20, 20);
   score += openInterestScore;
-
-  // Volatility component (5% weight)
-  const volatilityScore = Math.min(metrics.impliedVolatility * 0.05, 5);
-  score += volatilityScore;
 
   return Math.min(score, 100);
 }
