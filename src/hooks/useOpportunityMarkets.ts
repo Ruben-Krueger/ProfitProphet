@@ -25,7 +25,7 @@ interface OpportunityMarket {
     netReturn: number;
     confidence: number;
     reasoning: string;
-    timeToExpiry: number;
+
     requiredInvestment: number;
     riskLevel: string;
     detectedAt: string;

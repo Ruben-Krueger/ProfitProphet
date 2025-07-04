@@ -10,7 +10,7 @@ interface ArbitrageOpportunity {
   confidence: number;
   strategy: any;
   reasoning: string;
-  timeToExpiry: number;
+
   requiredInvestment: number;
   riskLevel: string;
   detectedAt: string;

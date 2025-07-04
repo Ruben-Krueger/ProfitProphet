@@ -39,7 +39,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
         confidence: true,
         strategy: true,
         reasoning: true,
-        timeToExpiry: true,
+
         requiredInvestment: true,
         riskLevel: true,
         detectedAt: true,

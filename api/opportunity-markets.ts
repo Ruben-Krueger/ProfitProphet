@@ -54,7 +54,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
             netReturn: true,
             confidence: true,
             reasoning: true,
-            timeToExpiry: true,
+
             requiredInvestment: true,
             riskLevel: true,
             detectedAt: true,

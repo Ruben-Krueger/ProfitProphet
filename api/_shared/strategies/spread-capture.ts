@@ -9,8 +9,6 @@ export interface SpreadCaptureConfig {
   minSpreadPercentage: number;
   minVolume: number;
   minOpenInterest: number;
-  maxTimeToExpiry: number; // days
-  minTimeToExpiry: number; // days
   transactionCostPercentage: number;
   minExpectedReturn: number;
   maxInvestment: number;
@@ -21,8 +19,6 @@ export const DEFAULT_SPREAD_CAPTURE_CONFIG: SpreadCaptureConfig = {
   minSpreadPercentage: 0.05, // 5% minimum spread
   minVolume: 100, // minimum volume in contracts
   minOpenInterest: 50, // minimum open interest
-  maxTimeToExpiry: 30, // maximum 30 days to expiry
-  minTimeToExpiry: 1, // minimum 1 day to expiry
   transactionCostPercentage: 0.02, // 2% transaction costs
   minExpectedReturn: 0.03, // 3% minimum expected return
   maxInvestment: 1000, // maximum $1000 per opportunity
@@ -41,8 +37,6 @@ export function findSpreadCaptureOpportunities(
 
     const metrics = calculateSpreadCaptureMetrics(market);
 
-    console.log(metrics);
-
     // Check if market meets basic criteria
     if (!meetsBasicCriteria(market, metrics, config)) continue;
 
@@ -53,7 +47,7 @@ export function findSpreadCaptureOpportunities(
       config
     );
 
-    if (opportunity && opportunity.expectedReturn >= config.minExpectedReturn) {
+    if (opportunity.expectedReturn >= config.minExpectedReturn) {
       opportunities.push(opportunity);
     }
   }
@@ -71,34 +65,14 @@ function calculateSpreadCaptureMetrics(market: Market): SpreadCaptureMetrics {
   const minPrice = Math.min(yesPrice, noPrice);
   const spreadPercentage = minPrice > 0 ? (bidAskSpread / minPrice) * 100 : 0;
 
-  // Calculate time to expiry in days
-  const timeToExpiry = Math.max(
-    0,
-    (market.resolutionDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-  );
-
-  // Debug logging for edge cases
-  if (timeToExpiry === 0) {
-    console.log(`Market ${market.id} has expired or invalid resolution date:`, {
-      resolutionDate: market.resolutionDate,
-      now: new Date(),
-      timeDiff: market.resolutionDate.getTime() - Date.now(),
-    });
-  }
-
   // Calculate implied volatility (simplified - based on price spread and time)
-  const impliedVolatility = calculateImpliedVolatility(
-    yesPrice,
-    noPrice,
-    timeToExpiry
-  );
+  const impliedVolatility = calculateImpliedVolatility(yesPrice, noPrice);
 
   // Calculate spread capture score (0-100)
   const spreadCaptureScore = calculateSpreadCaptureScore({
     spreadPercentage,
     volume: market.volume,
     openInterest: market.openInterest,
-    timeToExpiry,
     impliedVolatility,
   });
 
@@ -107,41 +81,34 @@ function calculateSpreadCaptureMetrics(market: Market): SpreadCaptureMetrics {
     spreadPercentage,
     volume24h: market.volume,
     openInterest: market.openInterest,
-    timeToExpiry,
     impliedVolatility,
     spreadCaptureScore,
   };
 }
 
-// TODO: Implement a more accurate implied volatility calculation
-function calculateImpliedVolatility(
-  yesPrice: number,
-  noPrice: number,
-  timeToExpiry: number
-): number {
-  // Simplified implied volatility calculation
+// Simplified volatility calculation for spread capture
+function calculateImpliedVolatility(yesPrice: number, noPrice: number): number {
+  // For spread capture, we care about current price dispersion, not time-based volatility
   const priceSpread = Math.abs(yesPrice - noPrice);
   const midPrice = (yesPrice + noPrice) / 2;
 
   // Handle edge cases to prevent NaN
-  if (midPrice === 0 || timeToExpiry < 0) {
+  if (midPrice === 0) {
     return 0;
   }
 
-  // Higher spread relative to mid price indicates higher volatility
+  // Higher spread relative to mid price indicates higher current volatility
   const volatilityRatio = priceSpread / midPrice;
 
-  // Adjust for time decay (longer time = higher potential volatility)
-  const timeAdjustment = Math.sqrt(Math.max(0, timeToExpiry) / 365);
-
-  return Math.min(volatilityRatio * timeAdjustment * 100, 100); // Cap at 100%
+  // For spread capture, we can ignore time to expiry since we're capturing current spreads
+  // Just scale to a reasonable range (0-100)
+  return Math.min(volatilityRatio * 100, 100);
 }
 
 function calculateSpreadCaptureScore(metrics: {
   spreadPercentage: number;
   volume: number;
   openInterest: number;
-  timeToExpiry: number;
   impliedVolatility: number;
 }): number {
   let score = 0;
@@ -151,7 +118,6 @@ function calculateSpreadCaptureScore(metrics: {
     isNaN(metrics.spreadPercentage) ||
     isNaN(metrics.volume) ||
     isNaN(metrics.openInterest) ||
-    isNaN(metrics.timeToExpiry) ||
     isNaN(metrics.impliedVolatility)
   ) {
     return 0;
@@ -169,16 +135,6 @@ function calculateSpreadCaptureScore(metrics: {
   const openInterestScore = Math.min((metrics.openInterest / 500) * 20, 20);
   score += openInterestScore;
 
-  // Time to expiry component (10% weight)
-  // Prefer markets with 3-14 days to expiry
-  const timeScore =
-    metrics.timeToExpiry >= 3 && metrics.timeToExpiry <= 14
-      ? 10
-      : metrics.timeToExpiry >= 1 && metrics.timeToExpiry <= 30
-        ? 5
-        : 0;
-  score += timeScore;
-
   // Volatility component (5% weight)
   const volatilityScore = Math.min(metrics.impliedVolatility * 0.05, 5);
   score += volatilityScore;
@@ -195,8 +151,6 @@ function meetsBasicCriteria(
     metrics.spreadPercentage >= config.minSpreadPercentage &&
     metrics.volume24h >= config.minVolume &&
     metrics.openInterest >= config.minOpenInterest &&
-    metrics.timeToExpiry >= config.minTimeToExpiry &&
-    metrics.timeToExpiry <= config.maxTimeToExpiry &&
     metrics.spreadCaptureScore >= 30 // Minimum score threshold
   );
 }
@@ -266,7 +220,7 @@ function calculateSpreadCaptureOpportunity(
     confidence: confidence,
     strategy: strategy,
     reasoning: generateSpreadCaptureReasoning(market, metrics),
-    timeToExpiry: metrics.timeToExpiry,
+
     requiredInvestment: totalInvestment,
     riskLevel: riskLevel,
     detectedAt: new Date(),
@@ -347,12 +301,10 @@ function determineRiskLevel(
     metrics.spreadPercentage < 0.1 ? 3 : metrics.spreadPercentage < 0.2 ? 2 : 1;
   const volumeRisk =
     metrics.volume24h < 200 ? 3 : metrics.volume24h < 500 ? 2 : 1;
-  const timeRisk =
-    metrics.timeToExpiry < 3 ? 3 : metrics.timeToExpiry > 14 ? 2 : 1;
   const volatilityRisk =
     metrics.impliedVolatility > 50 ? 3 : metrics.impliedVolatility > 25 ? 2 : 1;
 
-  const totalRisk = spreadRisk + volumeRisk + timeRisk + volatilityRisk;
+  const totalRisk = spreadRisk + volumeRisk + volatilityRisk;
 
   // Risk tolerance adjustment
   const riskThreshold =
@@ -383,12 +335,6 @@ function generateSpreadCaptureReasoning(
 
   if (metrics.openInterest > 200) {
     reasons.push(`Good liquidity with ${metrics.openInterest} open interest`);
-  }
-
-  if (metrics.timeToExpiry >= 3 && metrics.timeToExpiry <= 14) {
-    reasons.push(
-      `Optimal time to expiry of ${metrics.timeToExpiry.toFixed(1)} days`
-    );
   }
 
   if (metrics.spreadCaptureScore > 60) {

@@ -23,7 +23,6 @@ export interface ArbitrageOpportunity {
   confidence: number;
   strategy: TradingStrategy;
   reasoning: string;
-  timeToExpiry: number; // days
   requiredInvestment: number;
   riskLevel: "low" | "medium" | "high";
   detectedAt: Date;
@@ -129,7 +128,6 @@ export interface SpreadCaptureMetrics {
   spreadPercentage: number;
   volume24h: number;
   openInterest: number;
-  timeToExpiry: number;
   impliedVolatility: number;
   spreadCaptureScore: number;
 }

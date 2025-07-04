@@ -37,7 +37,7 @@ model ArbitrageOpportunity {
   confidence         Decimal             @db.Decimal(5, 4)
   strategy           Json
   reasoning          String
-  timeToExpiry       Int
+  timeToExpiry       Int?
   requiredInvestment Decimal             @db.Decimal(15, 2)
   riskLevel          RiskLevel
   detectedAt         DateTime            @default(now()) @db.Timestamptz(6)
