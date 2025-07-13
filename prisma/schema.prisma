@@ -23,7 +23,6 @@ model Market {
   status             MarketStatus
   lastUpdated        DateTime            @default(now()) @db.Timestamptz(6)
   createdAt          DateTime            @default(now()) @db.Timestamptz(6)
-  marketSnapshots    MarketSnapshot[]
   opportunityMarkets OpportunityMarket[]
 
   @@map("markets")
@@ -56,19 +55,6 @@ model OpportunityMarket {
 
   @@id([opportunityId, marketId])
   @@map("opportunity_markets")
-}
-
-model MarketSnapshot {
-  id           String   @id @default(cuid())
-  marketId     String   @db.VarChar(255)
-  yesPrice     Decimal  @db.Decimal(10, 4)
-  noPrice      Decimal  @db.Decimal(10, 4)
-  volume       Int
-  openInterest Int
-  capturedAt   DateTime @default(now()) @db.Timestamptz(6)
-  market       Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
-
-  @@map("market_snapshots")
 }
 
 model ExecutionLog {
