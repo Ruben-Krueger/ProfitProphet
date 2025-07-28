@@ -1,4 +1,9 @@
-import { type AuthError, createClient, Session } from "@supabase/supabase-js";
+import {
+  type AuthError,
+  createClient,
+  Session,
+  User,
+} from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 
 // Supabase client setup
@@ -7,22 +12,22 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function useAuth() {
-  const session: Session | null = null;
-
   const [error, setError] = useState<AuthError | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    // Check Supabase session
-    const session = supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setIsAuthenticated(true);
-      }
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setIsLoading(false);
+      setSession(session);
     });
+
     // Listen for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setIsAuthenticated(!!session);
+        setSession(session);
       }
     );
     return () => {
@@ -30,27 +35,21 @@ export default function useAuth() {
     };
   }, []);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
   const handleLogin = async (
     username: string,
     password: string
-  ): Promise<boolean> => {
-    const { error } = await supabase.auth.signInWithPassword({
+  ): Promise<void> => {
+    const { error, data } = await supabase.auth.signInWithPassword({
       email: username,
       password,
     });
-    if (!error) {
-      setIsAuthenticated(true);
-      return true;
-    }
-    return false;
+    setError(error);
+    setUser(data.user);
+    setSession(data.session);
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setIsAuthenticated(false);
   };
 
   return {
@@ -58,7 +57,7 @@ export default function useAuth() {
     handleLogout,
     isLoading,
     session,
+    user,
     error,
-    isAuthenticated,
   };
 }

@@ -7,9 +7,9 @@ export default function ProtectedRoute({
 }: {
   children: React.ReactElement;
 }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { session, isLoading } = useAuth();
 
   if (isLoading) return <Loading />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (session == null) return <Navigate to="/login" replace />;
   return children;
 }

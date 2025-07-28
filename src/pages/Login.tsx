@@ -11,10 +11,6 @@ export default function Login() {
 
   const { isLoading, handleLogin, error } = useAuth();
 
-  async function handleSubmit() {
-    await handleLogin(username, password);
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-slate-800 border-slate-700">
@@ -25,12 +21,18 @@ export default function Login() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-white">
-            Arbitrage Bot
+            ProfitProphet
           </CardTitle>
           <p className="text-slate-400">Prediction Market Opportunities</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={async e => {
+              e.preventDefault();
+              await handleLogin(username, password);
+            }}
+            className="space-y-4"
+          >
             <div>
               <Input
                 type="text"
