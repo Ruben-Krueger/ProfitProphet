@@ -41,3 +41,41 @@ of the second leg). Position sizing is capital- and liquidity-constrained —
 capped by a configurable max investment and by a fraction of market volume
 that scales with risk tolerance — rather than a probabilistic sizing formula,
 since the payout itself isn't probabilistic.
+
+## Logical Implication Arbitrage
+
+Some markets logically imply others. If market B's condition implies market
+A's condition — e.g. B = "BTC above $60,000", A = "BTC above $50,000", since
+being above $60k always means being above $50k too — then B resolving YES
+forces A to resolve YES as well. The combination (A=NO, B=YES) can never
+happen.
+
+That means holding **yes(A) + no(B)** guarantees at least $1.00 at
+resolution no matter which way either market resolves — the same
+guaranteed-floor mechanic as complementary arbitrage, applied across two
+related markets instead of one market's two sides. Whenever
+`yesAsk(A) + noAsk(B) < $1.00`, that combination locks in a profit minus
+fees.
+
+For "below"-direction thresholds the implication runs the other way: the
+lower threshold implies the higher one (below $10 implies below $20). In
+general, the market with the more extreme threshold is the "implying" side;
+the less extreme one is the "implied" side.
+
+**Finding implication pairs.** Two markets are only considered a candidate
+pair if they share the same `eventId` and the same resolution date — Kalshi
+groups threshold-variant markets on the same underlying question under one
+event ticker, which identifies "same metric, same timeframe" with high
+confidence, without any free-text similarity matching. A threshold and
+direction (`above`/`below` + a number) is then extracted from each market's
+title using a small, explicit set of keyword patterns. If a title doesn't
+match cleanly, that market is skipped entirely for this strategy — no
+partial or best-guess extraction. This intentionally misses some real
+opportunities in exchange for not acting on a misread relationship.
+
+**Extraction risk.** Unlike complementary arbitrage, this strategy's edge
+depends on correctly parsing two independent titles and trusting they
+describe the same underlying metric. This is reflected directly in the
+numbers: confidence is capped lower than complementary arbitrage's, and risk
+level is floored at "medium" even when liquidity, lockup, and edge size
+would otherwise call it "low."

@@ -12,9 +12,13 @@ This is currently a detection system - all orders must be placed manually.
 
 ## Trading Strategies
 
+See [api/_shared/strategies/README.md](api/_shared/strategies/README.md) for
+how the current strategies work.
+
 ### Complementary Arbitrage
 
+Arbitrage by buying trades where the probabilities do not sum to 1. 
 
-See [api/_shared/strategies/README.md](api/_shared/strategies/README.md) for
-how the current strategy works.
+### Logical Implication Arbitrage
+
 

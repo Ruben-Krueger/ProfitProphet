@@ -1,10 +1,15 @@
-import { test } from "node:test";
+import { test, describe } from "node:test";
 import assert from "node:assert/strict";
+import cases from "jest-in-case";
 import {
   findComplementaryArbitrageOpportunities,
   DEFAULT_COMPLEMENTARY_ARBITRAGE_CONFIG,
 } from "./complementary";
-import { Market } from "../types";
+import { ArbitrageOpportunity, Market } from "../types";
+
+// jest-in-case calls Jest's global `describe`/`test`; node:test exports them
+// as named imports instead of globalizing them, so bridge the two here.
+Object.assign(globalThis, { test, describe });
 
 function makeMarket(overrides: Partial<Market> = {}): Market {
   const yesAsk = overrides.yesAsk ?? 0.45;
@@ -30,47 +35,59 @@ function makeMarket(overrides: Partial<Market> = {}): Market {
   };
 }
 
-test("detects a positive-edge market as an opportunity", () => {
-  const market = makeMarket({ yesAsk: 0.45, noAsk: 0.5 }); // costs 0.95 for a $1 payout
-  const opportunities = findComplementaryArbitrageOpportunities([market]);
+interface OpportunityCase {
+  name: string;
+  overrides: Partial<Market>;
+  validate: (opportunities: ArbitrageOpportunity[]) => void;
+}
 
-  assert.equal(opportunities.length, 1);
-  assert.equal(opportunities[0].type, "complementary");
-});
-
-test("filters out markets where the pair costs at least $1", () => {
-  const market = makeMarket({ yesAsk: 0.55, noAsk: 0.5 }); // costs 1.05, no edge
-  const opportunities = findComplementaryArbitrageOpportunities([market]);
-
-  assert.equal(opportunities.length, 0);
-});
-
-test("sizes both legs equally (matched quantities)", () => {
-  const market = makeMarket({ yesAsk: 0.4, noAsk: 0.5, volume: 10000 });
-  const [opportunity] = findComplementaryArbitrageOpportunities([market]);
-
-  assert.ok(opportunity);
-  const [yesAction, noAction] = opportunity.strategy.actions;
-  assert.equal(yesAction.side, "yes");
-  assert.equal(noAction.side, "no");
-  assert.equal(yesAction.quantity, noAction.quantity);
-  assert.ok(yesAction.quantity > 0);
-});
-
-test("caps investment at maxInvestment even with very deep liquidity", () => {
-  const market = makeMarket({ yesAsk: 0.4, noAsk: 0.5, volume: 1_000_000 });
-  const [opportunity] = findComplementaryArbitrageOpportunities([market]);
-
-  assert.ok(opportunity);
-  assert.ok(
-    opportunity.requiredInvestment <=
-      DEFAULT_COMPLEMENTARY_ARBITRAGE_CONFIG.maxInvestment
-  );
-});
-
-test("skips markets that aren't active", () => {
-  const market = makeMarket({ yesAsk: 0.4, noAsk: 0.5, status: "closed" });
-  const opportunities = findComplementaryArbitrageOpportunities([market]);
-
-  assert.equal(opportunities.length, 0);
-});
+cases(
+  "findComplementaryArbitrageOpportunities",
+  ({ overrides, validate }: OpportunityCase) => {
+    const market = makeMarket(overrides);
+    validate(findComplementaryArbitrageOpportunities([market]));
+  },
+  [
+    {
+      name: "detects a positive-edge market as an opportunity",
+      overrides: { yesAsk: 0.45, noAsk: 0.5 }, // costs 0.95 for a $1 payout
+      validate: opportunities => {
+        assert.equal(opportunities.length, 1);
+        assert.equal(opportunities[0].type, "complementary");
+      },
+    },
+    {
+      name: "filters out markets where the pair costs at least $1",
+      overrides: { yesAsk: 0.55, noAsk: 0.5 }, // costs 1.05, no edge
+      validate: opportunities => assert.equal(opportunities.length, 0),
+    },
+    {
+      name: "sizes both legs equally (matched quantities)",
+      overrides: { yesAsk: 0.4, noAsk: 0.5, volume: 10000 },
+      validate: ([opportunity]) => {
+        assert.ok(opportunity);
+        const [yesAction, noAction] = opportunity.strategy.actions;
+        assert.equal(yesAction.side, "yes");
+        assert.equal(noAction.side, "no");
+        assert.equal(yesAction.quantity, noAction.quantity);
+        assert.ok(yesAction.quantity > 0);
+      },
+    },
+    {
+      name: "caps investment at maxInvestment even with very deep liquidity",
+      overrides: { yesAsk: 0.4, noAsk: 0.5, volume: 1_000_000 },
+      validate: ([opportunity]) => {
+        assert.ok(opportunity);
+        assert.ok(
+          opportunity.requiredInvestment <=
+            DEFAULT_COMPLEMENTARY_ARBITRAGE_CONFIG.maxInvestment
+        );
+      },
+    },
+    {
+      name: "skips markets that aren't active",
+      overrides: { yesAsk: 0.4, noAsk: 0.5, status: "closed" },
+      validate: opportunities => assert.equal(opportunities.length, 0),
+    },
+  ] satisfies OpportunityCase[]
+);
