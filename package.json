@@ -20,7 +20,8 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "cron:hourly": "tsx scripts/run-hourly-cron.ts",
-    "cron:hourly:pretty": "tsx scripts/run-hourly-cron.ts | pino-pretty"
+    "cron:hourly:pretty": "tsx scripts/run-hourly-cron.ts | pino-pretty",
+    "test": "node --import tsx --test api/_shared/**/*.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -103,6 +104,7 @@
     "tsx": "^4.20.3",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "vitest": "^2.1.9"
   }
 }

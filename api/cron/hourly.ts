@@ -4,7 +4,6 @@ import { prisma } from "../_shared/prisma";
 import { createKalshiClient } from "../_shared/kalshi_client";
 import { loadConfig } from "../_shared/config_module";
 import { createLogger } from "../_shared/logger";
-import { Market as PrismaMarket } from "@prisma/client";
 import { Market } from "../_shared/types";
 import TradingEngine from "api/_shared/trading-engine";
 
@@ -69,6 +68,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             question: market.question,
             yesPrice: market.yesPrice,
             noPrice: market.noPrice,
+            yesBid: market.yesBid,
+            yesAsk: market.yesAsk,
+            noBid: market.noBid,
+            noAsk: market.noAsk,
             volume: market.volume,
             openInterest: market.openInterest,
             resolutionDate: market.resolutionDate,
@@ -84,6 +87,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             question: market.question,
             yesPrice: market.yesPrice,
             noPrice: market.noPrice,
+            yesBid: market.yesBid,
+            yesAsk: market.yesAsk,
+            noBid: market.noBid,
+            noAsk: market.noAsk,
             volume: market.volume,
             openInterest: market.openInterest,
             resolutionDate: market.resolutionDate,

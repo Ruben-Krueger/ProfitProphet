@@ -3,30 +3,41 @@
 This directory contains individual trading strategies that can be used by the
 main trading engine.
 
-## Spread Capture Strategy
+## Complementary Arbitrage
 
-The spread capture strategy identifies profit opportunities in prediction
-markets by exploiting price discrepancies between the "yes" and "no" sides of
-the same market. In prediction markets, the sum of yes and no prices should
-theoretically equal 1.0 (or 100%), representing the total probability space.
-However, market inefficiencies, liquidity constraints, and trader behavior often
-create spreads where yes + no ≠ 1.0.
+Every Kalshi market resolves to exactly one of two outcomes: the "yes" side
+pays $1.00 and "no" pays $0.00, or vice versa. If you buy one "yes" contract
+and one "no" contract on the same market, you're guaranteed to hold exactly
+one winning contract at resolution — so the pair always pays out $1.00,
+regardless of which side wins.
 
-When a significant spread exists, the strategy takes simultaneous positions on
-both sides of the market. For example, if a market has yes at $0.45 and no at
-$0.50 (total = $0.95), the strategy would buy both positions, effectively paying
-$0.95 for a guaranteed $1.00 payout at resolution. The $0.05 difference
-represents the profit opportunity, minus transaction costs and the time value of
-money.
+This means that whenever the combined cost of buying one "yes" contract and
+one "no" contract (at the price you'd actually pay — the ask, not the
+midpoint) is less than $1.00, buying the pair locks in a profit equal to the
+difference, minus fees. For example, if yes asks at $0.45 and no asks at
+$0.50 (combined $0.95), buying one of each costs $0.95 for a guaranteed
+$1.00 payout — a $0.05 profit per pair before fees.
 
-The strategy uses a multi-factor scoring system to evaluate opportunities,
-considering factors like spread size, trading volume, open interest, time to
-expiry, and implied volatility. It employs Kelly Criterion position sizing to
-optimize risk-adjusted returns while managing exposure based on configurable
-risk tolerance levels.
+This is arbitrage in the traditional sense: the profit is determined at the
+moment both legs fill, not by predicting which way the market moves. It does
+not rely on the spread narrowing, mean reversion, or any view on the
+underlying question.
 
-This approach is more accurately described as statistical arbitrage rather than
-traditional market making, as it relies on mean reversion of price spreads
-rather than providing continuous liquidity. The strategy works best in markets
-with sufficient liquidity, reasonable time horizons, and clear resolution
-criteria.
+**What actually puts the profit at risk:**
+
+- **Execution risk.** The edge is only real if both legs fill at (or better
+  than) the ask prices used to detect the opportunity. Thin order books mean
+  the second leg may move or dry up before it fills, especially for larger
+  position sizes.
+- **Capital lockup.** The profit isn't realized until the market resolves.
+  Capital committed to a pair is unavailable for other opportunities until
+  then — longer time-to-resolution means longer lockup.
+- **Platform/counterparty risk.** Ordinary exchange risk (custody, settlement)
+  applies for the life of the position, same as any position held on Kalshi.
+
+The strategy scores opportunities on edge size, trading volume, and open
+interest (deeper, more liquid books are less likely to slip during execution
+of the second leg). Position sizing is capital- and liquidity-constrained —
+capped by a configurable max investment and by a fraction of market volume
+that scales with risk tolerance — rather than a probabilistic sizing formula,
+since the payout itself isn't probabilistic.

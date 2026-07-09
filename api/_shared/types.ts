@@ -4,6 +4,10 @@ export interface Market {
   question: string;
   yesPrice: number;
   noPrice: number;
+  yesBid: number;
+  yesAsk: number;
+  noBid: number;
+  noAsk: number;
   volume: number;
   openInterest: number;
   resolutionDate: Date;
@@ -34,8 +38,7 @@ export type ArbitrageType =
   | "temporal"
   | "complementary"
   | "correlation"
-  | "synthetic"
-  | "spread_capture";
+  | "synthetic";
 
 export interface TradingStrategy {
   actions: TradingAction[];
@@ -121,13 +124,4 @@ export interface NumericalExtraction {
   metric: string;
   direction: "above" | "below" | "equal";
   unit?: string;
-}
-
-export interface SpreadCaptureMetrics {
-  bidAskSpread: number;
-  spreadPercentage: number;
-  volume24h: number;
-  openInterest: number;
-  impliedVolatility: number;
-  spreadCaptureScore: number;
 }

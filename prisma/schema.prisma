@@ -14,6 +14,10 @@ model Market {
   question           String
   yesPrice           Decimal             @db.Decimal(10, 4)
   noPrice            Decimal             @db.Decimal(10, 4)
+  yesBid             Decimal?            @db.Decimal(10, 4)
+  yesAsk             Decimal?            @db.Decimal(10, 4)
+  noBid              Decimal?            @db.Decimal(10, 4)
+  noAsk              Decimal?            @db.Decimal(10, 4)
   volume             Int
   openInterest       Int
   resolutionDate     DateTime            @db.Timestamptz(6)
@@ -81,7 +85,6 @@ enum ArbitrageType {
   complementary
   correlation
   synthetic
-  spread_capture
 }
 
 enum RiskLevel {

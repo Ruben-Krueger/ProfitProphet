@@ -161,9 +161,15 @@ export class KalshiClient {
   }
 
   private parseMarketData = (marketData: any): Market => {
-    // Calculate mid prices for yes/no
+    // Calculate mid prices for yes/no (display only — not what you'd actually pay to fill)
     const yesPrice = (marketData.yes_bid + marketData.yes_ask) / 2 / 100; // Convert cents to dollars
     const noPrice = (marketData.no_bid + marketData.no_ask) / 2 / 100;
+
+    // Real executable prices, for strategies that need the price an order would actually fill at
+    const yesBid = marketData.yes_bid / 100;
+    const yesAsk = marketData.yes_ask / 100;
+    const noBid = marketData.no_bid / 100;
+    const noAsk = marketData.no_ask / 100;
 
     // Fallback to epoch time (Jan 1, 1970)
     let resolutionDate = new Date(0);
@@ -187,6 +193,10 @@ export class KalshiClient {
       question: `${marketData.title}${marketData.subtitle ? ` - ${marketData.subtitle}` : ""}`,
       yesPrice,
       noPrice,
+      yesBid,
+      yesAsk,
+      noBid,
+      noAsk,
       volume: marketData.volume,
       openInterest: marketData.open_interest,
       resolutionDate,
