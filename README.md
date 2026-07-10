@@ -17,8 +17,10 @@ how the current strategies work.
 
 ### Complementary Arbitrage
 
-Arbitrage by buying trades where the probabilities do not sum to 1. 
+Complementary arbitrage occurs when probabilities assigned to an event and its complement do not sum to 100%—for example, assigning a 70% chance that a patient has pneumonia and a 40% chance that they do not have pneumonia, which sums to 110% and is internally inconsistent.
 
 ### Logical Implication Arbitrage
+
+Logical implication arbitrage occurs when someone assigns inconsistent probabilities to logically related events—for example, giving a 70% chance that "it will rain" but only a 50% chance that "the ground will be wet," even though rain necessarily implies a wet ground.
 
 
