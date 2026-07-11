@@ -40,7 +40,7 @@ export class KalshiClient {
     try {
       // Load the private key
       const privateKey = crypto.createPrivateKey({
-        key: this.privateKey,
+        key: this.privateKey.replace(/\\n/g, "\n"),
         format: "pem",
       });
 

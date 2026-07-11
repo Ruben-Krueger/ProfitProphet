@@ -67,12 +67,8 @@ enum MarketStatus {
 }
 
 enum ArbitrageType {
-  semantic
   logical_implication
-  temporal
   complementary
-  correlation
-  synthetic
 }
 
 enum RiskLevel {

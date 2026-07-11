@@ -32,13 +32,7 @@ export interface ArbitrageOpportunity {
   detectedAt: Date;
 }
 
-export type ArbitrageType =
-  | "semantic"
-  | "logical_implication"
-  | "temporal"
-  | "complementary"
-  | "correlation"
-  | "synthetic";
+export type ArbitrageType = "logical_implication" | "complementary";
 
 export interface TradingStrategy {
   actions: TradingAction[];
@@ -75,49 +69,4 @@ export interface Config {
     alertThreshold: number;
     logLevel: "debug" | "info" | "warn" | "error";
   };
-}
-
-export interface SemanticSimilarity {
-  market1: Market;
-  market2: Market;
-  similarity: number;
-  reasoning: string;
-}
-
-export interface ImplicationRule {
-  higherThreshold: number;
-  lowerThreshold: number;
-  metric: string;
-  direction: "above" | "below";
-}
-
-export interface CorrelationRule {
-  pattern1: RegExp;
-  pattern2: RegExp;
-  expectedCorrelation: number;
-  description: string;
-}
-
-export interface ArbitrageResult {
-  opportunities: ArbitrageOpportunity[];
-  totalOpportunities: number;
-  totalPotentialReturn: number;
-  executionTime: number;
-  marketDataTimestamp: Date;
-}
-
-// Utility types for market analysis
-export interface MarketMetrics {
-  impliedProbability: number;
-  spread: number;
-  liquidity: number;
-  volatility: number;
-  timeDecay: number;
-}
-
-export interface NumericalExtraction {
-  value: number;
-  metric: string;
-  direction: "above" | "below" | "equal";
-  unit?: string;
 }
