@@ -5,6 +5,9 @@ node_modules/
 dist/
 build/
 
+# Prisma generated client (v7+ outputs outside node_modules)
+generated/
+
 # TypeScript cache
 *.tsbuildinfo
 
