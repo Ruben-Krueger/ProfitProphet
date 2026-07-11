@@ -15,6 +15,7 @@ export function Dashboard() {
     error,
     dataUpdatedAt,
   } = useDashboard();
+
   const [activeTab, setActiveTab] = useState<
     "overview" | "markets" | "opportunities"
   >("overview");
