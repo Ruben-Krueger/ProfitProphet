@@ -4,7 +4,6 @@ export const loadConfig = (): Config => {
   const requiredEnvVars = [
     "KALSHI_PRIVATE_KEY",
     "KALSHI_KEY_ID",
-    "OPENAI_API_KEY",
     "DATABASE_URL",
   ];
 
@@ -21,10 +20,6 @@ export const loadConfig = (): Config => {
       keyId: process.env.KALSHI_KEY_ID!,
       baseUrl: "https://api.elections.kalshi.com/trade-api/v2",
       environment: "production",
-    },
-    openai: {
-      apiKey: process.env.OPENAI_API_KEY!,
-      model: process.env.OPENAI_MODEL || "gpt-4",
     },
     strategy: {
       maxInvestment: parseInt(process.env.MAX_INVESTMENT || "1000"),

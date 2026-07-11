@@ -62,10 +62,6 @@ export interface Config {
     baseUrl: string;
     environment: "production";
   };
-  openai: {
-    apiKey: string;
-    model: string;
-  };
   strategy: {
     maxInvestment: number;
     minExpectedReturn: number;

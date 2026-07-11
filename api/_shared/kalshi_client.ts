@@ -1,5 +1,5 @@
 // src/clients/kalshi.ts
-
+// TODO: check if Kalshi has a package
 import { Market, Config } from "./types";
 import * as crypto from "crypto";
 
@@ -208,6 +208,7 @@ export class KalshiClient {
     };
   };
 
+  // TODO: replace with rate-limiter package like 'bottleneck'
   // Rate limiting helper
   private requestQueue: Array<() => Promise<any>> = [];
   private isProcessingQueue = false;

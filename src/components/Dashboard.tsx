@@ -1,12 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, TrendingUp, DollarSign, Activity, Target } from "lucide-react";
+import {
+  LogOut,
+  TrendingUp,
+  DollarSign,
+  Activity,
+  Target,
+  RefreshCw,
+} from "lucide-react";
 import { OpportunityTable } from "./OpportunityTable";
-import { useDashboard } from "../hooks";
+import { useDashboard, useRefreshOpportunities } from "../hooks";
 import { Markets } from "./Markets";
 import { useState } from "react";
 import useAuth from "@/hooks/useAuth";
 import Loading from "./Loading";
+import { toast } from "@/components/ui/sonner";
 
 export function Dashboard() {
   const {
@@ -21,6 +29,23 @@ export function Dashboard() {
   >("overview");
 
   const { handleLogout } = useAuth();
+
+  const refreshOpportunities = useRefreshOpportunities();
+
+  const handleRefresh = () => {
+    refreshOpportunities.mutate(undefined, {
+      onSuccess: result => {
+        toast.success(
+          `Scan complete: ${result.marketsProcessed} markets processed, ${result.opportunitiesCount} opportunities found`
+        );
+      },
+      onError: err => {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to trigger scan"
+        );
+      },
+    });
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -50,15 +75,29 @@ export function Dashboard() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-            size="sm"
-            className="bg-slate-800 border border-slate-700 text-white hover:bg-slate-600 rounded shadow-sm"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button
+              onClick={handleRefresh}
+              disabled={refreshOpportunities.isPending}
+              variant="outline"
+              size="sm"
+              className="bg-slate-800 border border-slate-700 text-white hover:bg-slate-600 rounded shadow-sm"
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${refreshOpportunities.isPending ? "animate-spin" : ""}`}
+              />
+              {refreshOpportunities.isPending ? "Scanning..." : "Run Scan Now"}
+            </Button>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+              className="bg-slate-800 border border-slate-700 text-white hover:bg-slate-600 rounded shadow-sm"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 

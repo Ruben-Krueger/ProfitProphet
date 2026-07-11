@@ -44,7 +44,6 @@ model ArbitrageOpportunity {
   riskLevel          RiskLevel
   detectedAt         DateTime            @default(now()) @db.Timestamptz(6)
   createdAt          DateTime            @default(now()) @db.Timestamptz(6)
-  executionLogs      ExecutionLog[]
   opportunityMarkets OpportunityMarket[]
 
   @@map("arbitrage_opportunities")
@@ -60,16 +59,6 @@ model OpportunityMarket {
   @@map("opportunity_markets")
 }
 
-model ExecutionLog {
-  id            String                @id @default(cuid())
-  opportunityId String?               @db.VarChar(255)
-  actionType    String
-  details       Json?
-  executedAt    DateTime              @default(now()) @db.Timestamptz(6)
-  opportunity   ArbitrageOpportunity? @relation(fields: [opportunityId], references: [id])
-
-  @@map("execution_logs")
-}
 
 enum MarketStatus {
   active

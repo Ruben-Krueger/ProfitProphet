@@ -60,7 +60,7 @@ export default function Login() {
               />
             </div>
             {error && (
-              <p className="text-red-400 text-sm">{JSON.stringify(error)}</p>
+              <p className="text-red-400 text-sm">An error occurred!</p>
             )}
             <Button
               type="submit"
