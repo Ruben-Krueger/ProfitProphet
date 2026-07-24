@@ -2,6 +2,27 @@ import { useQuery } from "@tanstack/react-query";
 import { createAuthHeaders } from "../utils/auth";
 import { getApiBaseUrl } from "../lib/utils";
 
+// Mirrors the `select` used by the /api/dashboard handler.
+export interface RecentOpportunity {
+  id: string;
+  type: string;
+  expectedReturn: number;
+  netReturn: number;
+  confidence: number;
+  riskLevel: string;
+  detectedAt: string;
+  opportunityMarkets: Array<{
+    market: {
+      id: string;
+      title: string;
+      question: string;
+      yesPrice: number;
+      noPrice: number;
+      category: string;
+    };
+  }>;
+}
+
 interface DashboardData {
   stats: {
     totalMarkets: number;
@@ -9,7 +30,7 @@ interface DashboardData {
     activeMarkets: number;
     avgExpectedReturn: number;
   };
-  recentOpportunities: any[];
+  recentOpportunities: RecentOpportunity[];
   chartData: {
     byType: Array<{ type: string; count: number }>;
     byRisk: Array<{ riskLevel: string; count: number }>;

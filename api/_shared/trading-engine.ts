@@ -1,6 +1,7 @@
 import { Market, ArbitrageOpportunity } from "./types";
 import { findComplementaryArbitrageOpportunities } from "./strategies/complementary";
 import { findLogicalImplicationOpportunities } from "./strategies/logical-implication";
+import { findMutuallyExclusiveArbitrageOpportunities } from "./strategies/mutually-exclusive";
 
 export default function TradingEngine(
   markets: Market[]
@@ -12,8 +13,10 @@ export default function TradingEngine(
     // Strategy 2: Logical Implication Arbitrage (buy yes(implied)+no(implying))
     ...findLogicalImplicationOpportunities(markets),
 
+    // Strategy 3: Mutually-Exclusive Set Arbitrage (buy no on every outcome)
+    ...findMutuallyExclusiveArbitrageOpportunities(markets),
+
     // TODO: Add other strategies here
-    // Strategy 3: Semantic Arbitrage
     // Strategy 4: Temporal Arbitrage
     // Strategy 5: Correlation-Based Arbitrage
   ];

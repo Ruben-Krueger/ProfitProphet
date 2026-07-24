@@ -1,7 +1,10 @@
 import type { VercelResponse } from "@vercel/node";
+import type { Prisma } from "../generated/prisma/client";
+import { ArbitrageType, RiskLevel } from "../generated/prisma/enums.js";
 import { prisma } from "./_shared/prisma.js";
 import { withAuth, AuthenticatedRequest } from "./_shared/auth.js";
 import { withCors } from "./_shared/cors.js";
+import { isEnumValue } from "./_shared/enum-query.js";
 
 async function handler(req: AuthenticatedRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -16,11 +19,19 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const offset = parseInt((query.offset as string) || "0");
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.ArbitrageOpportunityWhereInput = {};
     if (type) {
+      if (!isEnumValue(ArbitrageType, type)) {
+        return res.status(400).json({ error: `Invalid type: ${type}` });
+      }
       where.type = type;
     }
     if (riskLevel) {
+      if (!isEnumValue(RiskLevel, riskLevel)) {
+        return res
+          .status(400)
+          .json({ error: `Invalid riskLevel: ${riskLevel}` });
+      }
       where.riskLevel = riskLevel;
     }
 

@@ -8,8 +8,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+interface ChartOpportunity {
+  expectedPayout: number;
+  probability: number;
+}
+
 interface OpportunityChartProps {
-  data: any[];
+  data: ChartOpportunity[];
 }
 
 export const OpportunityChart = ({ data }: OpportunityChartProps) => {

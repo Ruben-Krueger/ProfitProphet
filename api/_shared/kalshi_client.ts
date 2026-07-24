@@ -3,23 +3,29 @@
 import { Market, Config } from "./types";
 import * as crypto from "crypto";
 
+interface KalshiRawMarket {
+  ticker: string;
+  title: string;
+  subtitle?: string;
+  yes_bid: number;
+  yes_ask: number;
+  no_bid: number;
+  no_ask: number;
+  volume: number;
+  open_interest: number;
+  close_ts: number;
+  event_ticker: string;
+  status: string;
+  category: string;
+}
+
 interface KalshiMarketResponse {
-  markets: Array<{
-    ticker: string;
-    title: string;
-    subtitle?: string;
-    yes_bid: number;
-    yes_ask: number;
-    no_bid: number;
-    no_ask: number;
-    volume: number;
-    open_interest: number;
-    close_ts: number;
-    event_ticker: string;
-    status: string;
-    category: string;
-  }>;
+  markets: KalshiRawMarket[];
   cursor?: string;
+}
+
+interface KalshiMarketDetailResponse {
+  market: KalshiRawMarket;
 }
 
 /**
@@ -96,10 +102,10 @@ export class KalshiClient {
     }
   }
 
-  private async makeAuthenticatedRequest(
+  private async makeAuthenticatedRequest<T>(
     endpoint: string,
     options: RequestInit = {}
-  ): Promise<any> {
+  ): Promise<T> {
     // Generate timestamp in milliseconds
     const timestamp = Date.now().toString();
     const method = options.method || "GET";
@@ -134,7 +140,7 @@ export class KalshiClient {
       );
     }
 
-    return response.json();
+    return response.json() as Promise<T>;
   }
 
   async fetchAllMarkets(limit?: number): Promise<Market[]> {
@@ -148,7 +154,7 @@ export class KalshiClient {
         ...(cursor && { cursor }),
       });
 
-      const data: KalshiMarketResponse = await this.makeAuthenticatedRequest(
+      const data = await this.makeAuthenticatedRequest<KalshiMarketResponse>(
         `/markets?${params.toString()}`
       );
 
@@ -174,7 +180,7 @@ export class KalshiClient {
       category,
     });
 
-    const data: KalshiMarketResponse = await this.makeAuthenticatedRequest(
+    const data = await this.makeAuthenticatedRequest<KalshiMarketResponse>(
       `/markets?${params.toString()}`
     );
 
@@ -182,16 +188,19 @@ export class KalshiClient {
   }
 
   async fetchMarketDetails(marketId: string): Promise<Market> {
-    const data = await this.makeAuthenticatedRequest(`/markets/${marketId}`);
+    const data =
+      await this.makeAuthenticatedRequest<KalshiMarketDetailResponse>(
+        `/markets/${marketId}`
+      );
     return this.parseMarketData(data.market);
   }
 
   // Public method for testing authentication
-  async testAuthentication(): Promise<any> {
-    return await this.makeAuthenticatedRequest("/user");
+  async testAuthentication(): Promise<unknown> {
+    return await this.makeAuthenticatedRequest<unknown>("/user");
   }
 
-  private parseMarketData = (marketData: any): Market => {
+  private parseMarketData = (marketData: KalshiRawMarket): Market => {
     // Calculate mid prices for yes/no (display only — not what you'd actually pay to fill)
     const yesPrice = (marketData.yes_bid + marketData.yes_ask) / 2 / 100; // Convert cents to dollars
     const noPrice = (marketData.no_bid + marketData.no_ask) / 2 / 100;
@@ -241,7 +250,7 @@ export class KalshiClient {
 
   // TODO: replace with rate-limiter package like 'bottleneck'
   // Rate limiting helper
-  private requestQueue: Array<() => Promise<any>> = [];
+  private requestQueue: Array<() => Promise<void>> = [];
   private isProcessingQueue = false;
   private readonly REQUEST_DELAY = 100; // ms between requests
 

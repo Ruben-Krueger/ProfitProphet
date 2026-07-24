@@ -2,13 +2,30 @@ import { useQuery } from "@tanstack/react-query";
 import { createAuthHeaders } from "../utils/auth";
 import { getApiBaseUrl } from "../lib/utils";
 
+// Mirrors TradingStrategy in api/_shared/types.ts, which is what the API
+// persists into the opportunity's `strategy` JSON column.
+interface TradingAction {
+  marketId: string;
+  side: "yes" | "no";
+  price: number;
+  quantity: number;
+  orderType: "limit" | "market";
+}
+
+interface TradingStrategy {
+  actions: TradingAction[];
+  totalCost: number;
+  guaranteedReturn: number;
+  description: string;
+}
+
 interface ArbitrageOpportunity {
   id: string;
   type: string;
   expectedReturn: number;
   netReturn: number;
   confidence: number;
-  strategy: any;
+  strategy: TradingStrategy;
   reasoning: string;
 
   requiredInvestment: number;

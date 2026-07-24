@@ -31,6 +31,7 @@ export async function runOpportunityScan(
   // Fetch markets
   logger.info("Fetching markets from Kalshi");
   const markets = await kalshiClient.fetchAllMarkets(MARKET_LIMIT);
+  console.log(markets);
   logger.info(
     { marketsCount: markets.length },
     "Successfully fetched markets from Kalshi"

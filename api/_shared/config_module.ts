@@ -29,14 +29,17 @@ export const loadConfig = (): Config => {
       transactionCostPercentage: parseFloat(
         process.env.TRANSACTION_COST_PCT || "0.02"
       ),
-      riskTolerance: (process.env.RISK_TOLERANCE as any) || "moderate",
+      riskTolerance:
+        (process.env.RISK_TOLERANCE as Config["strategy"]["riskTolerance"]) ||
+        "moderate",
     },
     monitoring: {
       checkIntervalMinutes: parseInt(
         process.env.CHECK_INTERVAL_MINUTES || "15"
       ),
       alertThreshold: parseFloat(process.env.ALERT_THRESHOLD || "0.05"),
-      logLevel: (process.env.LOG_LEVEL as any) || "info",
+      logLevel:
+        (process.env.LOG_LEVEL as Config["monitoring"]["logLevel"]) || "info",
     },
   };
 };

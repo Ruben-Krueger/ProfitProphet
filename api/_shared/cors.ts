@@ -23,7 +23,10 @@ export const handleCors = (req: VercelRequest, res: VercelResponse) => {
 };
 
 export const withCors = (
-  handler: (req: VercelRequest, res: VercelResponse) => Promise<any>
+  handler: (
+    req: VercelRequest,
+    res: VercelResponse
+  ) => Promise<VercelResponse | void>
 ) => {
   return async (req: VercelRequest, res: VercelResponse) => {
     // Handle CORS

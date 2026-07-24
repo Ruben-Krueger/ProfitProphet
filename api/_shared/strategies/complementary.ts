@@ -99,14 +99,6 @@ function calculateScore(metrics: {
   volume: number;
   openInterest: number;
 }): number {
-  if (
-    isNaN(metrics.edgePercentage) ||
-    isNaN(metrics.volume) ||
-    isNaN(metrics.openInterest)
-  ) {
-    return 0;
-  }
-
   // Edge size component (60% weight) - the actual guaranteed profit margin
   const edgeScore = Math.min(metrics.edgePercentage * 100 * 0.6, 60);
 

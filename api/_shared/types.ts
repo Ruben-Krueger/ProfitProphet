@@ -32,7 +32,10 @@ export interface ArbitrageOpportunity {
   detectedAt: Date;
 }
 
-export type ArbitrageType = "logical_implication" | "complementary";
+export type ArbitrageType =
+  | "logical_implication"
+  | "complementary"
+  | "mutually_exclusive";
 
 export interface TradingStrategy {
   actions: TradingAction[];

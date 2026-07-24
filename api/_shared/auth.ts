@@ -9,7 +9,10 @@ export interface AuthenticatedRequest extends VercelRequest {
 }
 
 export const withAuth = (
-  handler: (req: AuthenticatedRequest, res: VercelResponse) => Promise<any>
+  handler: (
+    req: AuthenticatedRequest,
+    res: VercelResponse
+  ) => Promise<VercelResponse | void>
 ) => {
   return async (req: AuthenticatedRequest, res: VercelResponse) => {
     try {

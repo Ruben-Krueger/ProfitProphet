@@ -1,4 +1,5 @@
 import type { VercelResponse } from "@vercel/node";
+import type { Prisma } from "../generated/prisma/client";
 import { prisma } from "./_shared/prisma.js";
 import { withAuth, AuthenticatedRequest } from "./_shared/auth.js";
 import { withCors } from "./_shared/cors.js";
@@ -16,7 +17,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const offset = parseInt((query.offset as string) || "0");
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.OpportunityMarketWhereInput = {};
     if (opportunityId) {
       where.opportunityId = opportunityId;
     }

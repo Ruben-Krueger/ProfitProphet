@@ -79,3 +79,53 @@ describe the same underlying metric. This is reflected directly in the
 numbers: confidence is capped lower than complementary arbitrage's, and risk
 level is floored at "medium" even when liquidity, lockup, and edge size
 would otherwise call it "low."
+
+## Mutually-Exclusive Set Arbitrage
+
+Many Kalshi events break a single question into a set of mutually-exclusive
+outcomes — "who wins the election", "which team wins the title", "which
+nominee wins the award" — grouped under one event ticker. By construction, **at
+most one** of those outcome markets can resolve YES.
+
+That guarantee makes a basket possible. If you buy one "no" contract on every
+outcome in the set, then since at most one outcome resolves YES, at least
+`N − 1` of your "no" contracts are winners — so the basket pays out **at least
+`N − 1` dollars** at resolution, no matter which outcome (if any) wins. Whenever
+the basket's cost, `Σ noAsk`, is less than that `N − 1` floor, buying it locks
+in a profit equal to the difference, minus fees. In bookmaking terms this is
+fading an **overround**: it appears exactly when the outcomes' YES prices sum to
+more than $1.00.
+
+This is the same guaranteed-floor mechanic as complementary arbitrage,
+generalized from one market's two sides to an event's `N` outcomes. It is
+arbitrage in the same strict sense — the profit is fixed once every leg fills,
+with no view on which outcome wins.
+
+**Why "no" and not "yes".** Buying "no" on every leg only requires that the
+outcomes are **mutually exclusive** (at most one YES). It does *not* require
+them to be **exhaustive**. A "yes"-basket dutch book (buy one "yes" on each,
+betting exactly one wins) would need exhaustiveness too — and a hidden
+"none-of-these" outcome would make the whole basket resolve NO and lose
+everything. The "no"-basket floor of `N − 1` holds whether zero or one outcome
+wins, so it leans on the weaker, safer assumption.
+
+**Choosing the legs.** Any leg with `noAsk < $1.00` only ever *increases* the
+guaranteed edge (it adds $1 to the floor for less than $1 of cost), and a subset
+of a mutually-exclusive set is still mutually exclusive — so the strategy keeps
+every such leg, then caps the basket at `maxLegs` (keeping the cheapest "no"
+prices) so it stays practical to fill. Legs priced at `noAsk ≥ $1.00` are
+dropped.
+
+**Finding the sets.** Candidate baskets are grouped strictly by shared
+`eventId` — the same "same underlying question" signal the logical-implication
+strategy uses, with no free-text matching. Threshold ladders (e.g. "BTC above
+$50k / above $60k / above $70k", detected via the same title parsing) are
+explicitly **excluded**: those markets are *not* mutually exclusive — several
+can be YES at once — so they're handled by logical-implication arbitrage
+instead, never as a dutch-book basket.
+
+**Exclusivity & execution risk.** The edge assumes the grouped outcomes really
+are mutually exclusive, and every leg has to fill at its quoted ask — more legs
+means more ways execution can slip. Like logical implication, this is reflected
+in the numbers: confidence is capped below complementary arbitrage's, risk level
+is floored at "medium", and a basket with more legs scores as riskier.

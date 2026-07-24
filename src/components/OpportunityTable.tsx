@@ -1,36 +1,47 @@
-interface Opportunity {
-  id: string;
-  market: string;
-  type: string;
-  expectedPayout: number;
-  probability: number;
-  status: "active" | "completed" | "expired";
-  timeFound: string;
-}
+import type { RecentOpportunity } from "../hooks/useDashboard";
 
 interface OpportunityTableProps {
-  opportunities: Opportunity[];
+  opportunities: RecentOpportunity[];
 }
 
 export const OpportunityTable = ({ opportunities }: OpportunityTableProps) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
-
   const formatPercentage = (rate: number) => {
     return `${(rate * 100).toFixed(1)}%`;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
+  const formatDetectedAt = (detectedAt: string) => {
+    const date = new Date(detectedAt);
+    if (isNaN(date.getTime())) {
+      return "—";
+    }
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
+
+  // An opportunity spans one or more markets; the first is the one the
+  // strategy is anchored on, so it stands in for the row.
+  const formatMarket = (opportunity: RecentOpportunity) => {
+    const [first] = opportunity.opportunityMarkets;
+    if (!first) {
+      return "—";
+    }
+    const extra = opportunity.opportunityMarkets.length - 1;
+    return extra > 0
+      ? `${first.market.title} +${extra} more`
+      : first.market.title;
+  };
+
+  const getRiskColor = (riskLevel: string) => {
+    switch (riskLevel) {
+      case "low":
         return "text-emerald-400 bg-emerald-500/10";
-      case "completed":
-        return "text-blue-400 bg-blue-500/10";
-      case "expired":
+      case "medium":
+        return "text-amber-400 bg-amber-500/10";
+      case "high":
         return "text-red-400 bg-red-500/10";
       default:
         return "text-slate-400 bg-slate-500/10";
@@ -49,16 +60,16 @@ export const OpportunityTable = ({ opportunities }: OpportunityTableProps) => {
               Type
             </th>
             <th className="text-left py-3 px-4 text-slate-300 font-medium">
-              Expected Payout
+              Expected Return
             </th>
             <th className="text-left py-3 px-4 text-slate-300 font-medium">
-              Probability
+              Confidence
             </th>
             <th className="text-left py-3 px-4 text-slate-300 font-medium">
-              Status
+              Risk
             </th>
             <th className="text-left py-3 px-4 text-slate-300 font-medium">
-              Time Found
+              Detected
             </th>
           </tr>
         </thead>
@@ -66,24 +77,24 @@ export const OpportunityTable = ({ opportunities }: OpportunityTableProps) => {
           {opportunities.slice(0, 8).map(opportunity => (
             <tr key={opportunity.id} className="border-b border-slate-700/50">
               <td className="py-3 px-4 text-white font-medium">
-                {opportunity.market}
+                {formatMarket(opportunity)}
               </td>
               <td className="py-3 px-4 text-slate-300">{opportunity.type}</td>
               <td className="py-3 px-4 text-emerald-400 font-medium">
-                {formatCurrency(opportunity.expectedPayout)}
+                {formatPercentage(opportunity.expectedReturn)}
               </td>
               <td className="py-3 px-4 text-slate-300">
-                {formatPercentage(opportunity.probability)}
+                {formatPercentage(opportunity.confidence)}
               </td>
               <td className="py-3 px-4">
                 <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(opportunity.status)}`}
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(opportunity.riskLevel)}`}
                 >
-                  {opportunity.status}
+                  {opportunity.riskLevel}
                 </span>
               </td>
               <td className="py-3 px-4 text-slate-400 text-sm">
-                {opportunity.timeFound}
+                {formatDetectedAt(opportunity.detectedAt)}
               </td>
             </tr>
           ))}

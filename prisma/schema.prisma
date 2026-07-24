@@ -69,6 +69,7 @@ enum MarketStatus {
 enum ArbitrageType {
   logical_implication
   complementary
+  mutually_exclusive
 }
 
 enum RiskLevel {
