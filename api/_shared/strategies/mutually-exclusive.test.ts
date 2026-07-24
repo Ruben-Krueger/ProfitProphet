@@ -114,9 +114,7 @@ cases(
       validate: opportunities => {
         assert.equal(opportunities.length, 1);
         assert.equal(opportunities[0].markets.length, 2);
-        assert.ok(
-          opportunities[0].markets.every(m => m.status === "active")
-        );
+        assert.ok(opportunities[0].markets.every(m => m.status === "active"));
       },
     },
     {
