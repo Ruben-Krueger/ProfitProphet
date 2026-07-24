@@ -22,6 +22,40 @@ interface KalshiMarketResponse {
   cursor?: string;
 }
 
+/**
+ * Normalize a PEM private key that may have been mangled by the environment:
+ * literal "\n" escapes, stripped newlines, surrounding quotes, or CRLF. The
+ * base64 body is re-wrapped at 64 chars so OpenSSL can always decode it.
+ */
+function normalizePem(input: string): string {
+  let pem = input.trim();
+
+  // Strip surrounding quotes some env UIs keep.
+  if (
+    (pem.startsWith('"') && pem.endsWith('"')) ||
+    (pem.startsWith("'") && pem.endsWith("'"))
+  ) {
+    pem = pem.slice(1, -1);
+  }
+
+  // Turn escaped "\n" / "\r" into real newlines, drop CR.
+  pem = pem.replace(/\\r/g, "").replace(/\\n/g, "\n").replace(/\r/g, "");
+
+  const match = pem.match(
+    /-----BEGIN ([A-Z0-9 ]+?)-----([\s\S]*?)-----END \1-----/
+  );
+  if (!match) {
+    // Not a recognizable PEM envelope; hand it back and let OpenSSL report.
+    return pem;
+  }
+
+  const label = match[1];
+  const body = match[2].replace(/[^A-Za-z0-9+/=]/g, ""); // keep base64 only
+  const wrapped = body.replace(/.{1,64}/g, "$&\n").trimEnd();
+
+  return `-----BEGIN ${label}-----\n${wrapped}\n-----END ${label}-----\n`;
+}
+
 export class KalshiClient {
   private baseUrl: string;
   private privateKey: string;
@@ -38,9 +72,10 @@ export class KalshiClient {
     const message = timestamp + method + path;
 
     try {
-      // Load the private key
+      // Load the private key. Normalize first so it decodes regardless of how
+      // newlines survived the environment (escaped "\n", stripped, or spaces).
       const privateKey = crypto.createPrivateKey({
-        key: this.privateKey.replace(/\\n/g, "\n"),
+        key: normalizePem(this.privateKey),
         format: "pem",
       });
 
@@ -153,11 +188,7 @@ export class KalshiClient {
 
   // Public method for testing authentication
   async testAuthentication(): Promise<any> {
-    try {
-      return await this.makeAuthenticatedRequest("/user");
-    } catch (error) {
-      throw error;
-    }
+    return await this.makeAuthenticatedRequest("/user");
   }
 
   private parseMarketData = (marketData: any): Market => {
