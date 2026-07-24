@@ -7,7 +7,9 @@ import {
   Activity,
   Target,
   RefreshCw,
+  User,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { OpportunityTable } from "./OpportunityTable";
 import { useDashboard, useRefreshOpportunities } from "../hooks";
 import { Markets } from "./Markets";
@@ -69,7 +71,7 @@ export function Dashboard() {
               <TrendingUp className="h-6 w-6 text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Arbitrage Bot</h1>
+              <h1 className="text-xl font-bold text-white">ProfitProphet</h1>
               <p className="text-sm text-slate-400">
                 Prediction Market Scanner
               </p>
@@ -86,7 +88,18 @@ export function Dashboard() {
               <RefreshCw
                 className={`h-4 w-4 mr-2 ${refreshOpportunities.isPending ? "animate-spin" : ""}`}
               />
-              {refreshOpportunities.isPending ? "Scanning..." : "Run Scan Now"}
+              {refreshOpportunities.isPending ? "Fetching..." : "Fetch"}
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="bg-slate-800 border border-slate-700 text-white hover:bg-slate-600 rounded shadow-sm"
+            >
+              <Link to="/account">
+                <User className="h-4 w-4 mr-2" />
+                Account
+              </Link>
             </Button>
             <Button
               onClick={handleLogout}

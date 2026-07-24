@@ -22,12 +22,16 @@ export default function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsLoading(false);
       setSession(session);
+      // The session is the only source of the user on a fresh load; without
+      // this, `user` stays null until someone calls handleLogin in this tab.
+      setUser(session?.user ?? null);
     });
 
     // Listen for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
+        setUser(session?.user ?? null);
       }
     );
     return () => {
